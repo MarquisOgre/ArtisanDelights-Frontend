@@ -1,4 +1,11 @@
-import heroPottery from '@/assets/hero-pottery.jpg';
+import podiCollection from '@/assets/podi-collection.jpg';
+import gunpowderPodi from '@/assets/gunpowder-podi.jpg';
+import peanutPodi from '@/assets/peanut-podi.jpg';
+import sesamePodiImg from '@/assets/sesame-podi.jpg';
+import drumstickPodi from '@/assets/drumstick-podi.jpg';
+import curryLeafPodi from '@/assets/curry-leaf-podi.jpg';
+import corianderPodi from '@/assets/coriander-podi.jpg';
+import garlicPodi from '@/assets/garlic-podi.jpg';
 
 export interface ProductVariant {
   id: string;
@@ -31,7 +38,7 @@ export const products: Product[] = [
       { id: '1-500', size: '500g', weight: '500g', price: 220, originalPrice: 260 },
       { id: '1-1kg', size: '1kg', weight: '1kg', price: 400, originalPrice: 480 }
     ],
-    image: heroPottery,
+    image: podiCollection,
     category: 'Traditional Podis',
     description: 'Classic South Indian spice blend perfect with idly, dosa, and rice. Made with roasted lentils, sesame seeds, and aromatic spices.',
     inStock: true,
@@ -48,7 +55,7 @@ export const products: Product[] = [
       { id: '2-500', size: '500g', weight: '500g', price: 250, originalPrice: 290 },
       { id: '2-1kg', size: '1kg', weight: '1kg', price: 450, originalPrice: 520 }
     ],
-    image: heroPottery,
+    image: peanutPodi,
     category: 'Traditional Podis',
     description: 'Nutritious peanut-based powder with roasted spices. Perfect protein-rich accompaniment for any South Indian meal.',
     inStock: true,
@@ -65,7 +72,7 @@ export const products: Product[] = [
       { id: '3-500', size: '500g', weight: '500g', price: 260, originalPrice: 310 },
       { id: '3-1kg', size: '1kg', weight: '1kg', price: 480, originalPrice: 560 }
     ],
-    image: heroPottery,
+    image: corianderPodi,
     category: 'Traditional Podis',
     description: 'Authentic sambar masala blend with perfect balance of spices. Essential for making traditional South Indian sambar.',
     inStock: true,
@@ -82,7 +89,7 @@ export const products: Product[] = [
       { id: '4-500', size: '500g', weight: '500g', price: 260, originalPrice: 310 },
       { id: '4-1kg', size: '1kg', weight: '1kg', price: 480, originalPrice: 560 }
     ],
-    image: heroPottery,
+    image: sesamePodiImg,
     category: 'Traditional Podis',
     description: 'Tangy and spicy rasam powder for the perfect South Indian soup. Made with traditional spices for authentic taste.',
     inStock: true,
@@ -98,7 +105,7 @@ export const products: Product[] = [
       { id: '5-500', size: '500g', weight: '500g', price: 280, originalPrice: 330 },
       { id: '5-1kg', size: '1kg', weight: '1kg', price: 520, originalPrice: 600 }
     ],
-    image: heroPottery,
+    image: curryLeafPodi,
     category: 'Traditional Podis',
     description: 'Aromatic curry leaves powder packed with flavor and health benefits. A unique blend that enhances any dish.',
     inStock: true,
@@ -115,7 +122,7 @@ export const products: Product[] = [
       { id: '6-500', size: '500g', weight: '500g', price: 240, originalPrice: 280 },
       { id: '6-1kg', size: '1kg', weight: '1kg', price: 440, originalPrice: 510 }
     ],
-    image: heroPottery,
+    image: gunpowderPodi,
     category: 'Traditional Podis',
     description: 'Spicy and flavorful gunpowder podi with extra kick. Perfect for those who love intense flavors with their breakfast.',
     inStock: true,
@@ -131,7 +138,7 @@ export const products: Product[] = [
       { id: '7-500', size: '500g', weight: '500g', price: 300, originalPrice: 350 },
       { id: '7-1kg', size: '1kg', weight: '1kg', price: 560, originalPrice: 650 }
     ],
-    image: heroPottery,
+    image: drumstickPodi,
     category: 'Traditional Podis',
     description: 'Instant coconut chutney powder - just add water! Made with fresh coconut and traditional spices for authentic taste.',
     inStock: true,
@@ -147,7 +154,7 @@ export const products: Product[] = [
       { id: '8-500', size: '500g', weight: '500g', price: 290, originalPrice: 340 },
       { id: '8-1kg', size: '1kg', weight: '1kg', price: 540, originalPrice: 620 }
     ],
-    image: heroPottery,
+    image: garlicPodi,
     category: 'Traditional Podis',
     description: 'Special spice blend for Karnataka\'s famous Bisi Bele Bath. Complex flavor profile with aromatic spices and lentils.',
     inStock: true,

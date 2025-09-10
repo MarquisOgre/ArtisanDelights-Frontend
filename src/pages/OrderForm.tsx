@@ -208,9 +208,9 @@ const OrderForm = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="standard">Standard Shipping (5-7 days) - $12.99</SelectItem>
-                      <SelectItem value="express">Express Shipping (2-3 days) - $24.99</SelectItem>
-                      <SelectItem value="overnight">Overnight Shipping - $39.99</SelectItem>
+                      <SelectItem value="standard">Standard Shipping (5-7 days) - ₹99</SelectItem>
+                      <SelectItem value="express">Express Shipping (2-3 days) - ₹199</SelectItem>
+                      <SelectItem value="overnight">Overnight Shipping - ₹299</SelectItem>
                     </SelectContent>
                   </Select>
                 </CardContent>
@@ -336,7 +336,7 @@ const OrderForm = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -348,20 +348,20 @@ const OrderForm = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    <span>${shipping.toFixed(2)}</span>
+                    <span>₹{shipping.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>₹{tax.toFixed(2)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span className="text-terracotta">${total.toFixed(2)}</span>
+                    <span className="text-terracotta">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
 

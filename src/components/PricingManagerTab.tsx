@@ -116,75 +116,159 @@ const PricingManagerTab = () => {
               <thead className="border-b bg-muted/50">
                 <tr>
                   <th className="text-left p-4">Product</th>
-                  <th className="text-left p-4">Variant</th>
-                  <th className="text-left p-4">Current Price</th>
-                  <th className="text-left p-4">Original Price</th>
-                  <th className="text-left p-4">Discount</th>
+                  <th className="text-left p-4">Trial Pack (50g)</th>
+                  <th className="text-left p-4">250g Pack</th>
+                  <th className="text-left p-4">500g Pack</th>
+                  <th className="text-left p-4">1kg Pack</th>
                   <th className="text-left p-4">Status</th>
                   <th className="text-left p-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) =>
-                  product.variants.map((variant) => {
-                    const discount = calculateDiscount(variant.originalPrice, variant.price);
-                    const isEditing = editingVariant === variant.id;
-                    
-                    return (
-                      <tr key={variant.id} className="border-b hover:bg-muted/20">
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-muted rounded"></div>
-                            <span className="font-medium">{product.name}</span>
-                          </div>
-                        </td>
-                        <td className="p-4">
+                {products.map((product) => {
+                  const trialVariant = product.variants.find(v => v.size === 'Trial Pack');
+                  const variant250 = product.variants.find(v => v.size === '250g');
+                  const variant500 = product.variants.find(v => v.size === '500g');
+                  const variant1kg = product.variants.find(v => v.size === '1kg');
+                  
+                  return (
+                    <tr key={product.id} className="border-b hover:bg-muted/20">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <img src={product.image} alt={product.name} className="w-10 h-10 rounded object-cover" />
                           <div>
-                            <span className="font-medium">{variant.size}</span>
-                            <p className="text-sm text-muted-foreground">{variant.weight}</p>
+                            <span className="font-medium">{product.name}</span>
+                            <p className="text-sm text-muted-foreground">{product.category}</p>
                           </div>
-                        </td>
-                        <td className="p-4">
-                          {isEditing ? (
-                            <Input
-                              type="number"
-                              value={tempPrices[variant.id] || variant.price}
-                              onChange={(e) => setTempPrices({
-                                ...tempPrices,
-                                [variant.id]: Number(e.target.value)
-                              })}
-                              className="w-24"
-                            />
-                          ) : (
-                            <span className="font-bold text-terracotta">₹{variant.price}</span>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          <span className="text-muted-foreground">
-                            {variant.originalPrice ? `₹${variant.originalPrice}` : '-'}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          {discount > 0 ? (
-                            <Badge className="bg-sage text-white">
-                              -{discount}%
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">No Discount</Badge>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          <Badge className={product.inStock ? 'bg-sage text-white' : 'bg-destructive text-white'}>
-                            {product.inStock ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </td>
-                        <td className="p-4">
-                          {isEditing ? (
-                            <div className="flex gap-1">
+                        </div>
+                      </td>
+                      
+                      {/* Trial Pack Variant */}
+                      <td className="p-4">
+                        {trialVariant && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              {editingVariant === trialVariant.id ? (
+                                <Input
+                                  type="number"
+                                  value={tempPrices[trialVariant.id] || trialVariant.price}
+                                  onChange={(e) => setTempPrices({
+                                    ...tempPrices,
+                                    [trialVariant.id]: Number(e.target.value)
+                                  })}
+                                  className="w-20 h-7 text-xs"
+                                />
+                              ) : (
+                                <span className="font-bold text-terracotta">₹{trialVariant.price}</span>
+                              )}
+                            </div>
+                            {trialVariant.originalPrice && (
+                              <div className="text-xs text-muted-foreground line-through">
+                                ₹{trialVariant.originalPrice}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      
+                      {/* 250g Variant */}
+                      <td className="p-4">
+                        {variant250 && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              {editingVariant === variant250.id ? (
+                                <Input
+                                  type="number"
+                                  value={tempPrices[variant250.id] || variant250.price}
+                                  onChange={(e) => setTempPrices({
+                                    ...tempPrices,
+                                    [variant250.id]: Number(e.target.value)
+                                  })}
+                                  className="w-20 h-7 text-xs"
+                                />
+                              ) : (
+                                <span className="font-bold text-terracotta">₹{variant250.price}</span>
+                              )}
+                            </div>
+                            {variant250.originalPrice && (
+                              <div className="text-xs text-muted-foreground line-through">
+                                ₹{variant250.originalPrice}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      
+                      {/* 500g Variant */}
+                      <td className="p-4">
+                        {variant500 && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              {editingVariant === variant500.id ? (
+                                <Input
+                                  type="number"
+                                  value={tempPrices[variant500.id] || variant500.price}
+                                  onChange={(e) => setTempPrices({
+                                    ...tempPrices,
+                                    [variant500.id]: Number(e.target.value)
+                                  })}
+                                  className="w-20 h-7 text-xs"
+                                />
+                              ) : (
+                                <span className="font-bold text-terracotta">₹{variant500.price}</span>
+                              )}
+                            </div>
+                            {variant500.originalPrice && (
+                              <div className="text-xs text-muted-foreground line-through">
+                                ₹{variant500.originalPrice}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      
+                      {/* 1kg Variant */}
+                      <td className="p-4">
+                        {variant1kg && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              {editingVariant === variant1kg.id ? (
+                                <Input
+                                  type="number"
+                                  value={tempPrices[variant1kg.id] || variant1kg.price}
+                                  onChange={(e) => setTempPrices({
+                                    ...tempPrices,
+                                    [variant1kg.id]: Number(e.target.value)
+                                  })}
+                                  className="w-20 h-7 text-xs"
+                                />
+                              ) : (
+                                <span className="font-bold text-terracotta">₹{variant1kg.price}</span>
+                              )}
+                            </div>
+                            {variant1kg.originalPrice && (
+                              <div className="text-xs text-muted-foreground line-through">
+                                ₹{variant1kg.originalPrice}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      
+                      <td className="p-4">
+                        <Badge className={product.inStock ? 'bg-sage text-white' : 'bg-destructive text-white'}>
+                          {product.inStock ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      
+                      <td className="p-4">
+                        <div className="flex gap-1">
+                          {editingVariant && product.variants.some(v => v.id === editingVariant) ? (
+                            <>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleSavePrice(variant.id)}
+                                onClick={() => handleSavePrice(editingVariant)}
                                 title="Save Price"
                               >
                                 <Save className="h-4 w-4 text-sage" />
@@ -197,22 +281,29 @@ const PricingManagerTab = () => {
                               >
                                 <X className="h-4 w-4 text-destructive" />
                               </Button>
-                            </div>
+                            </>
                           ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditPrice(variant.id, variant.price)}
-                              title="Edit Price"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <Select onValueChange={(variantId) => {
+                              const variant = product.variants.find(v => v.id === variantId);
+                              if (variant) handleEditPrice(variant.id, variant.price);
+                            }}>
+                              <SelectTrigger className="w-24 h-8 text-xs">
+                                <SelectValue placeholder="Edit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {product.variants.map(variant => (
+                                  <SelectItem key={variant.id} value={variant.id}>
+                                    {variant.size}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

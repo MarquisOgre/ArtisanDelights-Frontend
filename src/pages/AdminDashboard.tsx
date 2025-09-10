@@ -80,7 +80,7 @@ const AdminDashboard = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Total Revenue</p>
                     <p className="text-2xl font-bold text-terracotta">
-                      ${analytics.totalRevenue.toLocaleString()}
+                      ₹{analytics.totalRevenue.toLocaleString()}
                     </p>
                   </div>
                   <DollarSign className="h-8 w-8 text-terracotta" />
@@ -139,7 +139,7 @@ const AdminDashboard = () => {
                       <p className="text-sm text-muted-foreground">{order.customer}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">${order.amount}</p>
+                      <p className="font-bold">₹{order.amount}</p>
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>
@@ -177,8 +177,8 @@ const AdminDashboard = () => {
                     <Input id="productName" placeholder="Enter product name" />
                   </div>
                   <div>
-                    <Label htmlFor="price">Price</Label>
-                    <Input id="price" type="number" placeholder="0.00" />
+                    <Label htmlFor="price">Base Price (₹)</Label>
+                    <Input id="price" type="number" placeholder="150" />
                   </div>
                   <div>
                     <Label htmlFor="category">Category</Label>
@@ -187,10 +187,7 @@ const AdminDashboard = () => {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pottery">Pottery</SelectItem>
-                        <SelectItem value="woodwork">Woodwork</SelectItem>
-                        <SelectItem value="textiles">Textiles</SelectItem>
-                        <SelectItem value="jewelry">Jewelry</SelectItem>
+                        <SelectItem value="traditional-podis">Traditional Podis</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -204,7 +201,16 @@ const AdminDashboard = () => {
                   <Textarea id="description" placeholder="Product description" />
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="artisan">Save Product</Button>
+                  <Button 
+                    variant="artisan"
+                    onClick={() => {
+                      console.log('Saving new product...');
+                      setIsAddingProduct(false);
+                      alert('Product saved successfully!');
+                    }}
+                  >
+                    Save Product
+                  </Button>
                   <Button variant="outline" onClick={() => setIsAddingProduct(false)}>
                     Cancel
                   </Button>
@@ -379,7 +385,13 @@ const AdminDashboard = () => {
             <h2 className="text-2xl font-bold">User Management</h2>
             <div className="flex gap-2">
               <Input placeholder="Search users..." className="w-64" />
-              <Button variant="artisan">
+              <Button 
+                variant="artisan"
+                onClick={() => {
+                  console.log('Adding new user...');
+                  alert('Add user functionality - Connect to Supabase for full user management');
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add User
               </Button>

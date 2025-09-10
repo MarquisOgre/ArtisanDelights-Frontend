@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/enhanced-button';
 import ProductCard from '@/components/ProductCard';
 import { getFeaturedProducts } from '@/data/products';
 import { ArrowRight, Award, Heart, Truck, Leaf, ShoppingCart, Star } from 'lucide-react';
-import heroImage from '@/assets/hero-pottery.jpg';
+import heroImage from '@/assets/podi-collection.jpg';
+import Footer from '@/components/Footer';
 
 const Home = () => {
   const featuredProducts = getFeaturedProducts();
@@ -167,6 +168,8 @@ const Home = () => {
           </Link>
         </div>
       </section>
+
+      <Footer showTopButton />
     </div>
   );
 };

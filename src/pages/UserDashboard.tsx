@@ -186,7 +186,7 @@ const UserDashboard = () => {
                         <Badge className={getStatusColor(order.status)}>
                           {order.status}
                         </Badge>
-                        <p className="text-lg font-bold mt-2">${order.total}</p>
+                        <p className="text-lg font-bold mt-2">₹{order.total}</p>
                       </div>
                     </div>
                     <div>
@@ -224,7 +224,7 @@ const UserDashboard = () => {
                     <div>
                       <h3 className="font-semibold">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">by {item.artisan}</p>
-                      <p className="text-lg font-bold text-terracotta">${item.price}</p>
+                      <p className="text-lg font-bold text-terracotta">₹{item.price}</p>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="artisan" size="sm" className="flex-1">

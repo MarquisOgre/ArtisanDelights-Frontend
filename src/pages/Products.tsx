@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { products, categories, getProductsByCategory, getBasePrice, type Product } from '@/data/products';
 import { Search, Filter } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -135,6 +136,8 @@ const Products = () => {
           ))}
         </div>
       )}
+
+      <Footer showTopButton />
     </div>
   );
 };
