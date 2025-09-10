@@ -47,6 +47,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Artisan Delights Custom Colors
+        terracotta: "hsl(var(--terracotta))",
+        sage: "hsl(var(--sage))",
+        cream: "hsl(var(--cream))",
+        "warm-brown": "hsl(var(--warm-brown))",
+        "soft-beige": "hsl(var(--soft-beige))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -62,6 +68,16 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      backgroundImage: {
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-card": "var(--gradient-card)",
+        "gradient-subtle": "var(--gradient-subtle)",
+      },
+      boxShadow: {
+        "soft": "var(--shadow-soft)",
+        "card": "var(--shadow-card)", 
+        "glow": "var(--shadow-glow)",
       },
       keyframes: {
         "accordion-down": {
