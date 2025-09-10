@@ -3,7 +3,7 @@ import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/enhanced-button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { products, categories, getProductsByCategory, type Product } from '@/data/products';
+import { products, categories, getProductsByCategory, getBasePrice, type Product } from '@/data/products';
 import { Search, Filter } from 'lucide-react';
 
 const Products = () => {
@@ -18,7 +18,6 @@ const Products = () => {
     if (searchQuery) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.artisan.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
@@ -27,11 +26,9 @@ const Products = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
-          return a.price - b.price;
+          return getBasePrice(a) - getBasePrice(b);
         case 'price-high':
-          return b.price - a.price;
-        case 'artisan':
-          return a.artisan.localeCompare(b.artisan);
+          return getBasePrice(b) - getBasePrice(a);
         default:
           return a.name.localeCompare(b.name);
       }
@@ -99,7 +96,7 @@ const Products = () => {
             <SelectItem value="name">Name A-Z</SelectItem>
             <SelectItem value="price-low">Price: Low to High</SelectItem>
             <SelectItem value="price-high">Price: High to Low</SelectItem>
-            <SelectItem value="artisan">Artisan</SelectItem>
+            <SelectItem value="category">Category</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -134,8 +131,6 @@ const Products = () => {
             <ProductCard
               key={product.id}
               product={product}
-              onAddToCart={handleAddToCart}
-              onToggleFavorite={handleToggleFavorite}
             />
           ))}
         </div>
