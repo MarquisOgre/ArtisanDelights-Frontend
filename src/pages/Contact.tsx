@@ -145,9 +145,9 @@ const Contact = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground">
-                        Customer Service: +91 98765 43210<br />
-                        Orders & Inquiries: +91 98765 43211<br />
-                        WhatsApp: +91 98765 43212
+                        Customer Service: +91 8500 60 6000<br />
+                        Orders & Inquiries: +91 8500 60 6000<br />
+                        WhatsApp: +91 8500 60 6000
                       </p>
                     </CardContent>
                   </Card>

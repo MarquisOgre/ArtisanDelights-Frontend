@@ -87,7 +87,7 @@ const Footer = ({ showTopButton }: FooterProps) => {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <p className="text-muted-foreground">Email: info@artisandelights.com</p>
-            <p className="text-muted-foreground">Phone: +91 98765 43210</p>
+            <p className="text-muted-foreground">Phone: +91 8500 60 6000</p>
           </div>
         </div>
       </div>
