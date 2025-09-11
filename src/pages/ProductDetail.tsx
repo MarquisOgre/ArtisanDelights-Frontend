@@ -56,12 +56,13 @@ const ProductDetail = () => {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        {/* Two Column Layout with equal height */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto items-stretch">
           {/* Left Column: Product Image + Ingredients & Benefits */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col h-full">
             {/* Product Image */}
-            <Card className="overflow-hidden border-warm-brown/20">
-              <div className="relative h-96 md:h-[500px]">
+            <Card className="overflow-hidden border-warm-brown/20 flex-1">
+              <div className="relative h-96 md:h-full">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -126,7 +127,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Right Column: Product Details + Order */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col h-full">
             {/* Product Name & Description */}
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
@@ -183,11 +184,13 @@ const ProductDetail = () => {
             </Card>
 
             {/* Order Section */}
-            <Card className="border-warm-brown/20 bg-soft-beige/30">
-              <CardContent className="p-6">
+            <Card className="border-warm-brown/20 bg-soft-beige/30 flex-1">
+              <CardContent className="p-6 flex flex-col justify-center h-full">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <div className="text-sm text-muted-foreground">Selected: {selectedVariant?.size}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Selected: {selectedVariant?.size}
+                    </div>
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-bold text-terracotta">
                         ₹{selectedVariant?.price}
@@ -211,10 +214,13 @@ const ProductDetail = () => {
                   </Button>
                 </div>
                 {!product.inStock && (
-                  <p className="text-muted-foreground text-sm">This product is currently out of stock.</p>
+                  <p className="text-muted-foreground text-sm">
+                    This product is currently out of stock.
+                  </p>
                 )}
               </CardContent>
             </Card>
+
           </div>
         </div>
       </div>
