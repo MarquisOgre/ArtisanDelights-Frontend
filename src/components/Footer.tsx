@@ -13,14 +13,14 @@ const Footer = ({ showTopButton }: FooterProps) => {
     <footer className="bg-muted border-t">
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-4 gap-8">
+          {/* Logo + brand */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              {/* Logo placeholder - will be dynamically updated */}
               <div id="footer-logo-container" className="flex items-center">
-                <img 
-                  src="/logo.png" 
-                  alt="Artisan Delights Logo" 
-                  className="h-6 w-6"
+                <img
+                  src="/logo.png"
+                  alt="Artisan Delights Logo"
+                  className="h-12 w-12"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
@@ -32,34 +32,73 @@ const Footer = ({ showTopButton }: FooterProps) => {
               Authentic South Indian flavors delivered to your doorstep
             </p>
           </div>
+
+          {/* Quick Links */}
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <div className="space-y-2">
-              <Link to="/" className="block text-muted-foreground hover:text-foreground">Home</Link>
-              <Link to="/products" className="block text-muted-foreground hover:text-foreground">Products</Link>
-              <Link to="/contact" className="block text-muted-foreground hover:text-foreground">Contact</Link>
+              <Link
+                to="/"
+                className="block text-muted-foreground hover:text-foreground"
+              >
+                Home
+              </Link>
+              <Link
+                to="/products"
+                className="block text-muted-foreground hover:text-foreground"
+              >
+                Products
+              </Link>
+              <Link
+                to="/contact"
+                className="block text-muted-foreground hover:text-foreground"
+              >
+                Contact
+              </Link>
             </div>
           </div>
+
+          {/* Support */}
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <div className="space-y-2">
-              <Link to="/help" className="block text-muted-foreground hover:text-foreground">Help Center</Link>
-              <Link to="/terms" className="block text-muted-foreground hover:text-foreground">Terms</Link>
-              <Link to="/privacy" className="block text-muted-foreground hover:text-foreground">Privacy</Link>
+              <Link
+                to="/help"
+                className="block text-muted-foreground hover:text-foreground"
+              >
+                Help Center
+              </Link>
+              <Link
+                to="/terms"
+                className="block text-muted-foreground hover:text-foreground"
+              >
+                Terms
+              </Link>
+              <Link
+                to="/privacy"
+                className="block text-muted-foreground hover:text-foreground"
+              >
+                Privacy
+              </Link>
             </div>
           </div>
+
+          {/* Contact */}
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <p className="text-muted-foreground">Email: info@artisandelights.com</p>
             <p className="text-muted-foreground">Phone: +91 98765 43210</p>
           </div>
         </div>
-        <div className="border-t mt-8 pt-8 text-center">
-          <div className="bg-gradient-to-r from-terracotta via-warm-brown to-sage p-4 rounded-lg">
-            <p className="text-white font-medium">&copy; 2024 Artisan Delights. All rights reserved.</p>
-          </div>
-        </div>
       </div>
+
+      {/* Full-width gradient bar */}
+      <div className="w-full bg-gradient-to-r from-terracotta via-warm-brown to-sage p-4 text-center">
+        <p className="text-white font-medium">
+          &copy; 2024 Artisan Delights. All rights reserved.
+        </p>
+      </div>
+
       {showTopButton && (
         <button
           onClick={scrollToTop}

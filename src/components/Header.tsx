@@ -76,23 +76,16 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            {logoUrl ? (
-              <img 
-                src="/logo.png" 
-                alt="Artisan Delights Logo" 
-                className="h-8 w-8"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-            <div title="Click to change logo and favicon">
-              <Palette 
-                className="h-8 w-8 text-terracotta cursor-pointer" 
-                onClick={handleLogoWithFaviconClick}
-              />
-            </div>
-            )}
+            <img 
+              src={logoUrl || "/logo.png"}   // 👈 fallback to /public/logo.png
+              alt="Artisan Delights Logo" 
+              className="h-12 w-12 cursor-pointer"
+              onClick={handleLogoWithFaviconClick}
+              onError={(e) => {
+                // Hide if image not found
+                e.currentTarget.style.display = 'none';
+              }}
+            />
             <span className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
               Artisan Delights
             </span>

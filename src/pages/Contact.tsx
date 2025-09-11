@@ -19,7 +19,6 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Contact form submitted:', formData);
-    // TODO: Implement form submission
     alert('Thank you for your message! We will get back to you soon.');
     setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
   };
@@ -45,9 +44,9 @@ const Contact = () => {
       {/* Contact Content */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Contact Form */}
-            <Card className="shadow-lg lg:col-span-2">
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Send us a Message Card */}
+            <Card className="shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300">
               <CardHeader>
                 <CardTitle className="text-2xl text-warm-brown">Send us a Message</CardTitle>
               </CardHeader>
@@ -73,7 +72,7 @@ const Contact = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address *</Label>
                     <Input
@@ -84,7 +83,7 @@ const Contact = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject *</Label>
                     <Input
@@ -94,7 +93,7 @@ const Contact = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Message *</Label>
                     <Textarea
@@ -105,7 +104,7 @@ const Contact = () => {
                       required
                     />
                   </div>
-                  
+
                   <Button type="submit" size="lg" className="w-full bg-terracotta hover:bg-warm-brown text-white">
                     Send Message
                   </Button>
@@ -113,108 +112,117 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            {/* Contact Information */}
-            <div className="space-y-8 lg:col-span-1">
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Location Card */}
-                <Card className="shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-xl text-warm-brown flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
-                      Our Location
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      123 Traditional Street<br />
-                      South Indian Quarter<br />
-                      Chennai, Tamil Nadu 600001<br />
-                      India
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* Phone Numbers Card */}
-                <Card className="shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-xl text-warm-brown flex items-center gap-2">
-                      <Phone className="h-5 w-5" />
-                      Phone Numbers
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      Customer Service: +91 98765 43210<br />
-                      Orders & Inquiries: +91 98765 43211<br />
-                      WhatsApp: +91 98765 43212
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-warm-brown">Get in Touch</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-warm-brown rounded-full flex items-center justify-center flex-shrink-0">
-                      <Mail className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">Email Addresses</h3>
+            {/* Get in Touch Card */}
+            <Card className="shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300">
+              <CardHeader>
+                <CardTitle className="text-2xl text-warm-brown">Get in Touch</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Location */}
+                  <Card className="shadow-lg p-4 hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
+                    <CardHeader>
+                      <CardTitle className="text-xl text-warm-brown flex items-center gap-2">
+                        <MapPin className="h-5 w-5" /> Our Location
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <p className="text-muted-foreground">
-                        General: info@artisandelights.com<br />
-                        Orders: orders@artisandelights.com<br />
-                        Support: support@artisandelights.com
+                        123 Traditional Street<br />
+                        South Indian Quarter<br />
+                        Chennai, Tamil Nadu 600001<br />
+                        India
                       </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-soft-beige rounded-full flex items-center justify-center flex-shrink-0">
-                      <Clock className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">Business Hours</h3>
-                      <p className="text-muted-foreground">
-                        Monday - Friday: 9:00 AM - 7:00 PM<br />
-                        Saturday: 9:00 AM - 5:00 PM<br />
-                        Sunday: 10:00 AM - 4:00 PM<br />
-                        <span className="text-sm">(Indian Standard Time)</span>
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
 
-              <Card className="shadow-lg lg:col-span-3">
-                <CardHeader>
-                  <CardTitle className="text-xl text-warm-brown">Frequently Asked Questions</CardTitle>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-2">How fresh are your podis?</h4>
-                    <p className="text-sm text-muted-foreground">
-                      All our podis are made fresh to order and have a shelf life of 6-12 months when stored properly.
-                    </p>
+                  {/* Phone */}
+                  <Card className="shadow-lg p-4 hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
+                    <CardHeader>
+                      <CardTitle className="text-xl text-warm-brown flex items-center gap-2">
+                        <Phone className="h-5 w-5" /> Phone Numbers
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">
+                        Customer Service: +91 98765 43210<br />
+                        Orders & Inquiries: +91 98765 43211<br />
+                        WhatsApp: +91 98765 43212
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-warm-brown rounded-full flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Do you ship internationally?</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Currently, we ship across India. International shipping is coming soon!
+                    <h3 className="font-semibold mb-2">Email Addresses</h3>
+                    <p className="text-muted-foreground">
+                      General: info@artisandelights.com<br />
+                      Orders: orders@artisandelights.com<br />
+                      Support: support@artisandelights.com
                     </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-soft-beige rounded-full flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">What is your return policy?</h4>
-                    <p className="text-sm text-muted-foreground">
-                      We offer a 100% satisfaction guarantee. If you're not happy with your order, contact us within 7 days.
+                    <h3 className="font-semibold mb-2">Business Hours</h3>
+                    <p className="text-muted-foreground">
+                      Monday - Friday: 9:00 AM - 7:00 PM<br />
+                      Saturday: 9:00 AM - 5:00 PM<br />
+                      Sunday: 10:00 AM - 4:00 PM<br />
+                      <span className="text-sm">(Indian Standard Time)</span>
                     </p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+            {/* FAQ Section */}
+      <section className="py-20 bg-gradient-to-tr from-soft-beige/10 via-warm-brown/5 to-terracotta/10">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-warm-brown mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="shadow-lg p-6 hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300">
+              <CardHeader>
+                <CardTitle className="text-xl text-warm-brown">How fresh are your podis?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  All our podis are made fresh to order and have a shelf life of 6-12 months when stored properly.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg p-6 hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300">
+              <CardHeader>
+                <CardTitle className="text-xl text-warm-brown">Do you ship internationally?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Currently, we ship across India. International shipping is coming soon!
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg p-6 hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300">
+              <CardHeader>
+                <CardTitle className="text-xl text-warm-brown">What is your return policy?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  We offer a 100% satisfaction guarantee. If you're not happy with your order, contact us within 7 days.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
