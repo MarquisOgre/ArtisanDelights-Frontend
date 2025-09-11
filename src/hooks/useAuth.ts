@@ -12,19 +12,43 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate auth check
-    const mockUser: User = {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'admin'
-    };
-    
-    setTimeout(() => {
-      setUser(mockUser);
-      setIsLoading(false);
-    }, 100);
+    // Check for existing session
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false);
   }, []);
+
+  const signIn = async (email: string, password: string): Promise<boolean> => {
+    // Hardcoded credentials
+    const credentials = {
+      'admin@gmail.com': { password: '123456', role: 'admin' as const, name: 'Admin User' },
+      'user@gmail.com': { password: '123456', role: 'user' as const, name: 'Regular User' }
+    };
+
+    const userCred = credentials[email as keyof typeof credentials];
+    
+    if (userCred && userCred.password === password) {
+      const authUser: User = {
+        id: email === 'admin@gmail.com' ? '1' : '2',
+        name: userCred.name,
+        email,
+        role: userCred.role
+      };
+      
+      setUser(authUser);
+      localStorage.setItem('user', JSON.stringify(authUser));
+      return true;
+    }
+    
+    return false;
+  };
+
+  const signOut = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+  };
 
   const isAdmin = user?.role === 'admin';
 
@@ -32,7 +56,7 @@ export const useAuth = () => {
     user,
     isAdmin,
     isLoading,
-    signIn: () => {},
-    signOut: () => {}
+    signIn,
+    signOut
   };
 };

@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/enhanced-button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, ShoppingCart, User, Palette } from 'lucide-react';
+import { Menu, ShoppingCart, User, Palette, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Home' },
@@ -49,16 +51,32 @@ const Navigation = () => {
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />
             </Button>
-            <Link to="/user-dashboard">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/admin-dashboard">
-              <Button variant="artisan" size="sm">
-                Admin
-              </Button>
-            </Link>
+            
+            {user ? (
+              <>
+                <Link to="/user-dashboard">
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin-dashboard">
+                    <Button variant="artisan" size="sm">
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+                <Button variant="ghost" size="icon" onClick={signOut}>
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </>
+            ) : (
+              <Link to="/login">
+                <Button variant="artisan" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -83,16 +101,31 @@ const Navigation = () => {
                   </Link>
                 ))}
                 <div className="pt-4 space-y-2">
-                  <Link to="/user-dashboard" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full">
-                      User Dashboard
-                    </Button>
-                  </Link>
-                  <Link to="/admin-dashboard" onClick={() => setIsOpen(false)}>
-                    <Button variant="artisan" className="w-full">
-                      Admin Dashboard
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <>
+                      <Link to="/user-dashboard" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full">
+                          User Dashboard
+                        </Button>
+                      </Link>
+                      {isAdmin && (
+                        <Link to="/admin-dashboard" onClick={() => setIsOpen(false)}>
+                          <Button variant="artisan" className="w-full">
+                            Admin Dashboard
+                          </Button>
+                        </Link>
+                      )}
+                      <Button variant="ghost" className="w-full" onClick={() => { signOut(); setIsOpen(false); }}>
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="artisan" className="w-full">
+                        Sign In
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </SheetContent>
