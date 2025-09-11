@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/enhanced-button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import Header from './Header';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,9 +20,7 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <>
-      <Header />
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Desktop Navigation */}
@@ -128,7 +125,6 @@ const Navigation = () => {
           </div>
         </div>
       </nav>
-    </>
   );
 };
 
