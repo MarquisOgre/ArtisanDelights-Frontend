@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Palette, Menu, ShoppingCart, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/enhanced-button';
@@ -12,8 +12,19 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [, forceUpdate] = useState({});
   const location = useLocation();
   const { user, isAdmin, signOut } = useAuth();
+
+  // Force re-render when auth state changes
+  useEffect(() => {
+    const handleAuthChange = () => {
+      forceUpdate({});
+    };
+    
+    window.addEventListener('authStateChanged', handleAuthChange);
+    return () => window.removeEventListener('authStateChanged', handleAuthChange);
+  }, []);
 
   const navItems = [
     { href: '/', label: 'Home' },

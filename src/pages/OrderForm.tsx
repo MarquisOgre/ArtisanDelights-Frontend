@@ -24,7 +24,7 @@ const OrderForm = () => {
   const location = useLocation();
   const selectedProduct = location.state?.selectedProduct;
   
-  // Initialize cart with selected product or default items
+  // Initialize cart with selected product only, no default items
   const [cartItems, setCartItems] = useState(() => {
     if (selectedProduct) {
       return [{
@@ -36,24 +36,7 @@ const OrderForm = () => {
         image: selectedProduct.image || '',
       }];
     }
-    return [
-      {
-        id: '1',
-        name: 'Traditional Gunpowder Podi',
-        price: 299.99,
-        quantity: 1,
-        size: '250g',
-        image: '',
-      },
-      {
-        id: '2',
-        name: 'Sesame Podi Premium',
-        price: 249.99,
-        quantity: 2,
-        size: '200g',
-        image: '',
-      },
-    ];
+    return []; // No default items
   });
 
   const [formData, setFormData] = useState({
@@ -76,6 +59,9 @@ const OrderForm = () => {
     
     // Order Notes
     notes: '',
+    
+    // UPI Payment Reference
+    upiReference: '',
   });
 
   const updateQuantity = (id: string, newQuantity: number) => {
@@ -228,6 +214,7 @@ const OrderForm = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="free">Free Shipping (7-10 days) - ₹0</SelectItem>
                       <SelectItem value="standard">Standard Shipping (5-7 days) - ₹99</SelectItem>
                       <SelectItem value="express">Express Shipping (2-3 days) - ₹199</SelectItem>
                       <SelectItem value="overnight">Overnight Shipping - ₹299</SelectItem>
@@ -269,6 +256,21 @@ const OrderForm = () => {
                     <div className="mt-4 p-3 bg-muted rounded-lg">
                       <p className="text-sm font-medium">Total Amount: ₹{total.toFixed(2)}</p>
                     </div>
+                    
+                    {/* UPI Reference Number */}
+                    <div className="mt-4">
+                      <Label htmlFor="upiReference">UPI Payment Reference Number</Label>
+                      <Input
+                        id="upiReference"
+                        placeholder="Enter your UPI transaction reference number"
+                        value={formData.upiReference}
+                        onChange={(e) => handleInputChange('upiReference', e.target.value)}
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Please enter the transaction reference number after completing the UPI payment
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -297,9 +299,15 @@ const OrderForm = () => {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Cart Items */}
+                 {/* Cart Items */}
                 <div className="space-y-4">
-                  {cartItems.map((item) => (
+                  {cartItems.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No items in your cart</p>
+                      <p className="text-sm">Add items from the products page</p>
+                    </div>
+                  ) : (
+                    cartItems.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg">
                       <div className="w-16 h-16 bg-muted rounded"></div>
                       <div className="flex-1 min-w-0">
@@ -337,7 +345,8 @@ const OrderForm = () => {
                         <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                     </div>
-                  ))}
+                    ))
+                  )}
                 </div>
 
                 <Separator />
@@ -368,6 +377,7 @@ const OrderForm = () => {
                   className="w-full" 
                   size="lg"
                   onClick={handleSubmit}
+                  disabled={cartItems.length === 0}
                 >
                   Complete Order
                 </Button>

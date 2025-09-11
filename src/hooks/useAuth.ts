@@ -15,7 +15,11 @@ export const useAuth = () => {
     // Check for existing session
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        localStorage.removeItem('user');
+      }
     }
     setIsLoading(false);
   }, []);
@@ -39,6 +43,8 @@ export const useAuth = () => {
       
       setUser(authUser);
       localStorage.setItem('user', JSON.stringify(authUser));
+      // Trigger a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
       return true;
     }
     
@@ -48,6 +54,8 @@ export const useAuth = () => {
   const signOut = () => {
     setUser(null);
     localStorage.removeItem('user');
+    // Trigger a custom event to notify other components
+    window.dispatchEvent(new CustomEvent('authStateChanged'));
   };
 
   const isAdmin = user?.role === 'admin';
