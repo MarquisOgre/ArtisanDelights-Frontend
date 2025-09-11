@@ -10,8 +10,9 @@ const Footer = ({ showTopButton }: FooterProps) => {
   };
 
   return (
-    <footer className="bg-muted border-t">
-      <div className="container mx-auto px-4 py-8">
+    <footer className="w-full bg-muted border-t">
+      {/* Main footer content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo + brand */}
           <div>
@@ -86,7 +87,9 @@ const Footer = ({ showTopButton }: FooterProps) => {
           {/* Contact */}
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
-            <p className="text-muted-foreground">Email: info@artisandelights.com</p>
+            <p className="text-muted-foreground">
+              Email: info@artisandelights.com
+            </p>
             <p className="text-muted-foreground">Phone: +91 8500 60 6000</p>
           </div>
         </div>

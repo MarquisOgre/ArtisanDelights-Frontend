@@ -39,106 +39,108 @@ const Products = () => {
   }, [selectedCategory, searchQuery, sortBy]);
 
   const handleAddToCart = (product: Product) => {
-    // TODO: Implement cart functionality
     console.log('Added to cart:', product);
   };
 
   const handleToggleFavorite = (productId: string) => {
-    // TODO: Implement favorites functionality
     console.log('Toggled favorite:', productId);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Our Collection</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Discover unique handcrafted items from talented artisans around the world
-        </p>
-      </div>
-
-      {/* Filters */}
-      <div className="mb-8 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:gap-6">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search products, artisans..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+    <>
+      {/* Page Content */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Our Collection</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Discover unique handcrafted items from talented artisans around the world
+          </p>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? 'artisan' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
+        {/* Filters */}
+        <div className="mb-8 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:gap-6">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search products, artisans..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? 'artisan' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sort */}
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Name A-Z</SelectItem>
+              <SelectItem value="price-low">Price: Low to High</SelectItem>
+              <SelectItem value="price-high">Price: High to Low</SelectItem>
+              <SelectItem value="category">Category</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-muted-foreground">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
+        </div>
+
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-xl text-muted-foreground mb-4">No products found</p>
+            <p className="text-muted-foreground mb-6">
+              Try adjusting your search or filter criteria
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('All');
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+              />
             ))}
           </div>
-        </div>
-
-        {/* Sort */}
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Name A-Z</SelectItem>
-            <SelectItem value="price-low">Price: Low to High</SelectItem>
-            <SelectItem value="price-high">Price: High to Low</SelectItem>
-            <SelectItem value="category">Category</SelectItem>
-          </SelectContent>
-        </Select>
+        )}
       </div>
 
-      {/* Results Count */}
-      <div className="mb-6">
-        <p className="text-muted-foreground">
-          Showing {filteredProducts.length} of {products.length} products
-        </p>
-      </div>
-
-      {/* Products Grid */}
-      {filteredProducts.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-xl text-muted-foreground mb-4">No products found</p>
-          <p className="text-muted-foreground mb-6">
-            Try adjusting your search or filter criteria
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedCategory('All');
-            }}
-          >
-            Clear Filters
-          </Button>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
-          ))}
-        </div>
-      )}
-
+      {/* Footer outside container so it's full width */}
       <Footer showTopButton />
-    </div>
+    </>
   );
 };
 
