@@ -18,6 +18,7 @@ export interface ProductVariant {
 export interface Product {
   id: string;
   name: string;
+  slug: string;
   variants: ProductVariant[];
   image: string;
   category: string;
@@ -32,6 +33,7 @@ export const products: Product[] = [
   {
     id: '1',
     name: 'Idly Podi',
+    slug: 'idly-podi',
     variants: [
       { id: '1-trial', size: 'Trial Pack', weight: '50g', price: 45, originalPrice: 55 },
       { id: '1-250', size: '250g', weight: '250g', price: 120, originalPrice: 140 },
@@ -49,6 +51,7 @@ export const products: Product[] = [
   {
     id: '2',
     name: 'Palli Podi (Peanut Powder)',
+    slug: 'palli-podi-peanut-powder',
     variants: [
       { id: '2-trial', size: 'Trial Pack', weight: '50g', price: 50, originalPrice: 60 },
       { id: '2-250', size: '250g', weight: '250g', price: 135, originalPrice: 155 },
@@ -66,6 +69,7 @@ export const products: Product[] = [
   {
     id: '3',
     name: 'Sambar Powder',
+    slug: 'sambar-powder',
     variants: [
       { id: '3-trial', size: 'Trial Pack', weight: '50g', price: 55, originalPrice: 65 },
       { id: '3-250', size: '250g', weight: '250g', price: 140, originalPrice: 165 },
@@ -83,6 +87,7 @@ export const products: Product[] = [
   {
     id: '4',
     name: 'Rasam Powder',
+    slug: 'rasam-powder',
     variants: [
       { id: '4-trial', size: 'Trial Pack', weight: '50g', price: 55, originalPrice: 65 },
       { id: '4-250', size: '250g', weight: '250g', price: 140, originalPrice: 165 },
@@ -99,6 +104,7 @@ export const products: Product[] = [
   {
     id: '5',
     name: 'Curry Leaves Podi',
+    slug: 'curry-leaves-podi',
     variants: [
       { id: '5-trial', size: 'Trial Pack', weight: '50g', price: 60, originalPrice: 70 },
       { id: '5-250', size: '250g', weight: '250g', price: 150, originalPrice: 175 },
@@ -116,6 +122,7 @@ export const products: Product[] = [
   {
     id: '6',
     name: 'Gunpowder Idly Podi',
+    slug: 'gunpowder-idly-podi',
     variants: [
       { id: '6-trial', size: 'Trial Pack', weight: '50g', price: 50, originalPrice: 60 },
       { id: '6-250', size: '250g', weight: '250g', price: 130, originalPrice: 150 },
@@ -132,6 +139,7 @@ export const products: Product[] = [
   {
     id: '7',
     name: 'Coconut Chutney Podi',
+    slug: 'coconut-chutney-podi',
     variants: [
       { id: '7-trial', size: 'Trial Pack', weight: '50g', price: 65, originalPrice: 75 },
       { id: '7-250', size: '250g', weight: '250g', price: 160, originalPrice: 185 },
@@ -148,6 +156,7 @@ export const products: Product[] = [
   {
     id: '8',
     name: 'Bisi Bele Bath Powder',
+    slug: 'bisi-bele-bath-powder',
     variants: [
       { id: '8-trial', size: 'Trial Pack', weight: '50g', price: 60, originalPrice: 70 },
       { id: '8-250', size: '250g', weight: '250g', price: 155, originalPrice: 180 },
@@ -179,4 +188,9 @@ export const getBasePrice = (product: Product) => {
 export const getVariantById = (productId: string, variantId: string) => {
   const product = products.find(p => p.id === productId);
   return product?.variants.find(v => v.id === variantId);
+};
+
+// Get product by slug
+export const getProductBySlug = (slug: string) => {
+  return products.find(p => p.slug === slug);
 };

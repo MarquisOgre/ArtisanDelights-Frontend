@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { products } from '@/data/products';
+import { getProductBySlug } from '@/data/products';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Badge } from '@/components/ui/badge';
@@ -8,9 +8,9 @@ import { useState } from 'react';
 import Footer from '@/components/Footer';
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
-  const product = products.find(p => p.id === id);
+  const product = getProductBySlug(slug || '');
   const [selectedVariant, setSelectedVariant] = useState(product?.variants[0]);
 
   if (!product) {
@@ -57,8 +57,9 @@ const ProductDetail = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Product Image */}
-          <div className="relative">
+          {/* Left Column: Product Image + Ingredients & Benefits */}
+          <div className="space-y-6">
+            {/* Product Image */}
             <Card className="overflow-hidden border-warm-brown/20">
               <div className="relative h-96 md:h-[500px]">
                 <img
@@ -80,22 +81,6 @@ const ProductDetail = () => {
                 )}
               </div>
             </Card>
-          </div>
-
-          {/* Product Details */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
-              <div className="flex items-center space-x-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                ))}
-                <span className="text-muted-foreground ml-2">(4.8 reviews)</span>
-              </div>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                {product.description}
-              </p>
-            </div>
 
             {/* Ingredients */}
             {product.ingredients && (
@@ -138,6 +123,23 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+
+          {/* Right Column: Product Details + Order */}
+          <div className="space-y-6">
+            {/* Product Name & Description */}
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
+              <div className="flex items-center space-x-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                ))}
+                <span className="text-muted-foreground ml-2">(4.8 reviews)</span>
+              </div>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                {product.description}
+              </p>
+            </div>
 
             {/* Variant Selection */}
             <Card className="border-warm-brown/20">

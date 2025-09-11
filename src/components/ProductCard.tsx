@@ -92,7 +92,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 )}
               </div>
             </div>
-            <Link to={`/products/${product.id}`}>
+            <Link to={`/products/${product.slug}`}>
               <Button
                 variant="artisan"
                 size="sm"
