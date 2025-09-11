@@ -39,6 +39,8 @@ const OrderForm = () => {
     return []; // No default items
   });
 
+  const [selectedShipping, setSelectedShipping] = useState('free');
+
   const [formData, setFormData] = useState({
     // Shipping Information
     firstName: '',
@@ -81,7 +83,15 @@ const OrderForm = () => {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = 12.99;
+  
+  const shippingOptions = {
+    free: 0,
+    standard: 99,
+    express: 199,
+    overnight: 299
+  };
+  
+  const shipping = shippingOptions[selectedShipping as keyof typeof shippingOptions] || 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
@@ -209,7 +219,7 @@ const OrderForm = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Select defaultValue="standard">
+                  <Select value={selectedShipping} onValueChange={setSelectedShipping}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

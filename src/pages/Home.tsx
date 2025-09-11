@@ -129,24 +129,26 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
           
           <div className="text-center">
-            <Link to="/products">
-              <Button variant="artisan" size="lg" className="mr-4">
-                View All Products
-              </Button>
-            </Link>
-            <Link to="/order-form">
-              <Button size="lg" className="bg-terracotta hover:bg-warm-brown text-white">
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                Start Your Order
-              </Button>
-            </Link>
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              <Link to="/products">
+                <Button variant="artisan" size="lg">
+                  View All Products
+                </Button>
+              </Link>
+              <Link to="/order-form">
+                <Button size="lg" className="bg-terracotta hover:bg-warm-brown text-white">
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  Start Your Order
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

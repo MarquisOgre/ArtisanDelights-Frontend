@@ -18,7 +18,7 @@ const Footer = ({ showTopButton }: FooterProps) => {
               {/* Logo placeholder - will be dynamically updated */}
               <div id="footer-logo-container" className="flex items-center">
                 <img 
-                  src="/lovable-uploads/logo.png" 
+                  src="/logo.png" 
                   alt="Artisan Delights Logo" 
                   className="h-6 w-6"
                   onError={(e) => {

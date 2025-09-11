@@ -45,9 +45,9 @@ const Contact = () => {
       {/* Contact Content */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-3 gap-12">
             {/* Contact Form */}
-            <Card className="shadow-lg">
+            <Card className="shadow-lg lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-2xl text-warm-brown">Send us a Message</CardTitle>
               </CardHeader>
@@ -114,7 +114,7 @@ const Contact = () => {
             </Card>
 
             {/* Contact Information */}
-            <div className="space-y-8">
+            <div className="space-y-8 lg:col-span-1">
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Location Card */}
                 <Card className="shadow-lg">
@@ -189,11 +189,11 @@ const Contact = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-lg">
+              <Card className="shadow-lg lg:col-span-3">
                 <CardHeader>
                   <CardTitle className="text-xl text-warm-brown">Frequently Asked Questions</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="grid md:grid-cols-3 gap-6">
                   <div>
                     <h4 className="font-semibold mb-2">How fresh are your podis?</h4>
                     <p className="text-sm text-muted-foreground">

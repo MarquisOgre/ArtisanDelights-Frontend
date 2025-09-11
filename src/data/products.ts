@@ -175,7 +175,7 @@ export const products: Product[] = [
 
 export const categories = ['All', 'Traditional Podis'];
 
-export const getFeaturedProducts = () => products.filter(product => product.featured);
+export const getFeaturedProducts = () => products.slice(0, 8);
 export const getProductsByCategory = (category: string) => 
   category === 'All' ? products : products.filter(product => product.category === category);
 

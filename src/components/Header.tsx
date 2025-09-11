@@ -78,14 +78,11 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
           <Link to="/" className="flex items-center space-x-2">
             {logoUrl ? (
               <img 
-                src={logoUrl} 
+                src="/logo.png" 
                 alt="Artisan Delights Logo" 
-                className="h-8 w-8 cursor-pointer"
-                onClick={handleLogoWithFaviconClick}
+                className="h-8 w-8"
                 onError={(e) => {
-                  // Fallback to icon if custom logo fails
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
             ) : (
