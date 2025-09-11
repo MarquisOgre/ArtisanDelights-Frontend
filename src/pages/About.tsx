@@ -127,9 +127,10 @@ const About = () => {
               </Button>
             </Link>
             <Link to="/contact">
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-terracotta transition-colors">
-                Contact Us
+              <Button size="lg"
+              className="bg-terracotta text-white hover:bg-white hover:text-terracotta transition-colors rounded-lg">Contact Us
               </Button>
+
             </Link>
           </div>
         </div>
