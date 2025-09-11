@@ -14,7 +14,17 @@ const Footer = ({ showTopButton }: FooterProps) => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">Artisan Delights</h3>
+            <div className="flex items-center space-x-2 mb-4">
+              <img 
+                src="/lovable-uploads/logo.png" 
+                alt="Artisan Delights Logo" 
+                className="h-6 w-6"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <h3 className="font-bold text-lg">Artisan Delights</h3>
+            </div>
             <p className="text-muted-foreground">
               Authentic South Indian flavors delivered to your doorstep
             </p>
@@ -41,8 +51,10 @@ const Footer = ({ showTopButton }: FooterProps) => {
             <p className="text-muted-foreground">Phone: +91 98765 43210</p>
           </div>
         </div>
-        <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-          <p>&copy; 2024 Artisan Delights. All rights reserved.</p>
+        <div className="border-t mt-8 pt-8 text-center">
+          <div className="bg-gradient-to-r from-terracotta via-warm-brown to-sage p-4 rounded-lg">
+            <p className="text-white font-medium">&copy; 2024 Artisan Delights. All rights reserved.</p>
+          </div>
         </div>
       </div>
       {showTopButton && (

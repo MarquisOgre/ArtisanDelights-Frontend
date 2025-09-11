@@ -25,7 +25,17 @@ const Navigation = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <Palette className="h-8 w-8 text-terracotta" />
+            <img 
+              src="/lovable-uploads/logo.png" 
+              alt="Artisan Delights Logo" 
+              className="h-8 w-8"
+              onError={(e) => {
+                // Fallback to icon if custom logo fails
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <Palette className="h-8 w-8 text-terracotta hidden" />
             <span className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
               Artisan Delights
             </span>

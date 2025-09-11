@@ -23,7 +23,10 @@ const Login = () => {
       const success = await signIn(email, password);
       if (success) {
         toast.success('Signed in successfully!');
-        navigate('/');
+        // Force a small delay to ensure state updates
+        setTimeout(() => {
+          navigate('/');
+        }, 100);
       } else {
         toast.error('Invalid email or password');
       }
