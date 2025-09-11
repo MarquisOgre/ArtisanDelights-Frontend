@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Input } from '@/components/ui/input';
@@ -9,36 +9,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { 
-  CreditCard, 
   MapPin, 
   Truck, 
-  Lock,
   Minus,
   Plus,
-  X
+  X,
+  QrCode
 } from 'lucide-react';
+import Footer from '@/components/Footer';
+import upiQrImage from '@/assets/upi-qr-placeholder.png';
 
 const OrderForm = () => {
   const navigate = useNavigate();
-  // Mock cart data with podi products
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      name: 'Traditional Gunpowder Podi',
-      price: 299.99,
-      quantity: 1,
-      size: '250g',
-      image: '',
-    },
-    {
-      id: '2',
-      name: 'Sesame Podi Premium',
-      price: 249.99,
-      quantity: 2,
-      size: '200g',
-      image: '',
-    },
-  ]);
+  const location = useLocation();
+  const selectedProduct = location.state?.selectedProduct;
+  
+  // Initialize cart with selected product or default items
+  const [cartItems, setCartItems] = useState(() => {
+    if (selectedProduct) {
+      return [{
+        id: selectedProduct.id || '1',
+        name: selectedProduct.name,
+        price: selectedProduct.price,
+        quantity: 1,
+        size: selectedProduct.size,
+        image: selectedProduct.image || '',
+      }];
+    }
+    return [
+      {
+        id: '1',
+        name: 'Traditional Gunpowder Podi',
+        price: 299.99,
+        quantity: 1,
+        size: '250g',
+        image: '',
+      },
+      {
+        id: '2',
+        name: 'Sesame Podi Premium',
+        price: 249.99,
+        quantity: 2,
+        size: '200g',
+        image: '',
+      },
+    ];
+  });
 
   const [formData, setFormData] = useState({
     // Shipping Information
@@ -224,57 +240,35 @@ const OrderForm = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Payment Information
+                    <QrCode className="h-5 w-5" />
+                    Payment via UPI
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
-                      onChange={(e) => handleInputChange('cardNumber', e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="expiryDate">Expiry Date</Label>
-                      <Input
-                        id="expiryDate"
-                        placeholder="MM/YY"
-                        value={formData.expiryDate}
-                        onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                        required
-                      />
+                  <div className="text-center">
+                    <p className="text-muted-foreground mb-4">
+                      Scan the QR code below with any UPI app to make payment
+                    </p>
+                    
+                    <div className="flex justify-center mb-4">
+                      <div className="p-4 bg-white rounded-lg border-2 border-dashed border-muted-foreground/30">
+                        <img 
+                          src={upiQrImage} 
+                          alt="UPI QR Code" 
+                          className="w-48 h-48 object-contain"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input
-                        id="cvv"
-                        placeholder="123"
-                        value={formData.cvv}
-                        onChange={(e) => handleInputChange('cvv', e.target.value)}
-                        required
-                      />
+                    
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• Open any UPI app (Google Pay, PhonePe, Paytm, etc.)</p>
+                      <p>• Scan the QR code</p>
+                      <p>• Complete the payment</p>
                     </div>
-                    <div>
-                      <Label htmlFor="cardName">Name on Card</Label>
-                      <Input
-                        id="cardName"
-                        value={formData.cardName}
-                        onChange={(e) => handleInputChange('cardName', e.target.value)}
-                        required
-                      />
+                    
+                    <div className="mt-4 p-3 bg-muted rounded-lg">
+                      <p className="text-sm font-medium">Total Amount: ₹{total.toFixed(2)}</p>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Lock className="h-4 w-4" />
-                    Your payment information is secure and encrypted
                   </div>
                 </CardContent>
               </Card>
@@ -386,6 +380,7 @@ const OrderForm = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -13,7 +13,16 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
       const newLogoUrl = prompt('Enter new logo URL:');
       if (newLogoUrl) {
         onLogoChange(newLogoUrl);
+        // Also update footer logo
+        updateFooterLogo(newLogoUrl);
       }
+    }
+  };
+
+  const updateFooterLogo = (logoUrl: string) => {
+    const footerLogoContainer = document.getElementById('footer-logo-container');
+    if (footerLogoContainer) {
+      footerLogoContainer.innerHTML = `<img src="${logoUrl}" alt="Logo" class="h-8 w-8" />`;
     }
   };
 
@@ -29,6 +38,12 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
     }
   };
 
+  // Auto-trigger favicon change when logo is clicked (combined functionality)
+  const handleLogoWithFaviconClick = () => {
+    handleLogoClick();
+    handleFaviconClick();
+  };
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
@@ -40,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
                 src={logoUrl} 
                 alt="Artisan Delights Logo" 
                 className="h-8 w-8 cursor-pointer"
-                onClick={handleLogoClick}
+                onClick={handleLogoWithFaviconClick}
                 onError={(e) => {
                   // Fallback to icon if custom logo fails
                   e.currentTarget.style.display = 'none';
@@ -48,10 +63,10 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
                 }}
               />
             ) : (
-            <div title="Click to change logo">
+            <div title="Click to change logo and favicon">
               <Palette 
                 className="h-8 w-8 text-terracotta cursor-pointer" 
-                onClick={handleLogoClick}
+                onClick={handleLogoWithFaviconClick}
               />
             </div>
             )}
@@ -60,14 +75,24 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, onLogoChange }) => {
             </span>
           </Link>
 
-          {/* Favicon Change Button */}
-          <button
-            onClick={handleFaviconClick}
-            className="text-sm text-muted-foreground hover:text-terracotta transition-colors"
-            title="Click to change favicon"
-          >
-            Change Favicon
-          </button>
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-6">
+            <Link to="/products" className="text-muted-foreground hover:text-terracotta transition-colors">
+              Products
+            </Link>
+            <Link to="/about" className="text-muted-foreground hover:text-terracotta transition-colors">
+              About
+            </Link>
+            <Link to="/contact" className="text-muted-foreground hover:text-terracotta transition-colors">
+              Contact
+            </Link>
+            <Link to="/order-form" className="text-muted-foreground hover:text-terracotta transition-colors">
+              Checkout
+            </Link>
+            <Link to="/login" className="text-muted-foreground hover:text-terracotta transition-colors">
+              Sign In
+            </Link>
+          </div>
         </div>
       </div>
     </header>

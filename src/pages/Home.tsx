@@ -37,7 +37,7 @@ const Home = () => {
                     </Button>
                   </Link>
                   <Link to="/products">
-                    <Button variant="outline" size="xl" className="text-lg px-8 py-6 text-white border-white bg-black/20 hover:bg-white hover:text-terracotta shadow-lg backdrop-blur-sm">
+                    <Button variant="outline" size="xl" className="text-lg px-8 py-6 text-white border-white bg-terracotta/80 hover:bg-terracotta hover:text-white shadow-lg backdrop-blur-sm font-semibold">
                       Explore Products
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>

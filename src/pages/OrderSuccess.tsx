@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/enhanced-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, ArrowRight, Home } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 const OrderSuccess = () => {
   return (
@@ -50,6 +51,7 @@ const OrderSuccess = () => {
           </Card>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

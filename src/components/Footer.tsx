@@ -15,14 +15,17 @@ const Footer = ({ showTopButton }: FooterProps) => {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <img 
-                src="/lovable-uploads/logo.png" 
-                alt="Artisan Delights Logo" 
-                className="h-6 w-6"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+              {/* Logo placeholder - will be dynamically updated */}
+              <div id="footer-logo-container" className="flex items-center">
+                <img 
+                  src="/lovable-uploads/logo.png" 
+                  alt="Artisan Delights Logo" 
+                  className="h-6 w-6"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
               <h3 className="font-bold text-lg">Artisan Delights</h3>
             </div>
             <p className="text-muted-foreground">

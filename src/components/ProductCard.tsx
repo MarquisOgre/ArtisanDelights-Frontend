@@ -92,7 +92,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 )}
               </div>
             </div>
-            <Link to="/order-form">
+            <Link 
+              to="/order-form" 
+              state={{ 
+                selectedProduct: {
+                  id: product.id,
+                  name: product.name,
+                  price: basePrice,
+                  size: product.variants[0].size,
+                  image: product.image
+                }
+              }}
+            >
               <Button
                 variant="artisan"
                 size="sm"
