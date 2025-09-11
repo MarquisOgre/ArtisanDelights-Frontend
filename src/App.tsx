@@ -11,6 +11,7 @@ import Contact from "./pages/Contact";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import OrderForm from "./pages/OrderForm";
+import OrderSuccess from "./pages/OrderSuccess";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 
@@ -32,7 +33,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/order" element={<OrderForm />} />
+            <Route path="/order-form" element={<OrderForm />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -115,39 +115,48 @@ const Contact = () => {
 
             {/* Contact Information */}
             <div className="space-y-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Location Card */}
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-warm-brown flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Our Location
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      123 Traditional Street<br />
+                      South Indian Quarter<br />
+                      Chennai, Tamil Nadu 600001<br />
+                      India
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Phone Numbers Card */}
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-warm-brown flex items-center gap-2">
+                      <Phone className="h-5 w-5" />
+                      Phone Numbers
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Customer Service: +91 98765 43210<br />
+                      Orders & Inquiries: +91 98765 43211<br />
+                      WhatsApp: +91 98765 43212
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-2xl text-warm-brown">Get in Touch</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
-                      <MapPin className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">Our Location</h3>
-                      <p className="text-muted-foreground">
-                        123 Traditional Street<br />
-                        South Indian Quarter<br />
-                        Chennai, Tamil Nadu 600001<br />
-                        India
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-sage rounded-full flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">Phone Numbers</h3>
-                      <p className="text-muted-foreground">
-                        Customer Service: +91 98765 43210<br />
-                        Orders & Inquiries: +91 98765 43211<br />
-                        WhatsApp: +91 98765 43212
-                      </p>
-                    </div>
-                  </div>
                   
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-warm-brown rounded-full flex items-center justify-center flex-shrink-0">

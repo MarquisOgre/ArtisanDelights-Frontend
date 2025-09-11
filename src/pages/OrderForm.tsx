@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Input } from '@/components/ui/input';
@@ -18,22 +19,23 @@ import {
 } from 'lucide-react';
 
 const OrderForm = () => {
-  // Mock cart data
+  const navigate = useNavigate();
+  // Mock cart data with podi products
   const [cartItems, setCartItems] = useState([
     {
       id: '1',
-      name: 'Handcrafted Ceramic Bowl Set',
-      price: 89.99,
+      name: 'Traditional Gunpowder Podi',
+      price: 299.99,
       quantity: 1,
-      artisan: 'Maria Rodriguez',
+      size: '250g',
       image: '',
     },
     {
-      id: '3',
-      name: 'Hand-Woven Wool Scarf',
-      price: 68.50,
+      id: '2',
+      name: 'Sesame Podi Premium',
+      price: 249.99,
       quantity: 2,
-      artisan: 'Elena Vasquez',
+      size: '200g',
       image: '',
     },
   ]);
@@ -87,8 +89,10 @@ const OrderForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement order submission
+    // Simulate order processing
     console.log('Order submitted:', { formData, cartItems, total });
+    // Redirect to success page
+    navigate('/order-success');
   };
 
   return (
@@ -306,7 +310,7 @@ const OrderForm = () => {
                       <div className="w-16 h-16 bg-muted rounded"></div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm leading-tight">{item.name}</h4>
-                        <p className="text-xs text-muted-foreground">by {item.artisan}</p>
+                        <p className="text-xs text-muted-foreground">{item.size}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <Button
                             variant="outline"
