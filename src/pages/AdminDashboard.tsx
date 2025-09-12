@@ -52,12 +52,13 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage your artisan marketplace</p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <div className="container mx-auto px-4 py-8 flex-1">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage your artisan marketplace</p>
+        </div>
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -446,7 +447,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -477,17 +478,6 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-bold text-terracotta">0</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-terracotta" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Premium Users</p>
-                    <p className="text-2xl font-bold text-warm-brown">0</p>
-                  </div>
-                  <Users className="h-8 w-8 text-warm-brown" />
                 </div>
               </CardContent>
             </Card>
@@ -696,7 +686,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
+      
+      {/* Fixed Footer */}
       <Footer />
     </div>
   );

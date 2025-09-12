@@ -7,10 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { products } from '@/data/products';
 import { Edit, Save, X, TrendingUp, TrendingDown, Percent } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const PricingManagerTab = () => {
   const [editingVariant, setEditingVariant] = useState<string | null>(null);
   const [tempPrices, setTempPrices] = useState<{ [key: string]: number }>({});
+  const [updatedPrices, setUpdatedPrices] = useState<{ [key: string]: number }>({});
+  const { toast } = useToast();
 
   const handleEditPrice = (variantId: string, currentPrice: number) => {
     setEditingVariant(variantId);
@@ -18,9 +21,20 @@ const PricingManagerTab = () => {
   };
 
   const handleSavePrice = (variantId: string) => {
-    console.log('Saving price for variant:', variantId, 'New price:', tempPrices[variantId]);
-    // TODO: Update the actual product price in database
-    alert(`Price updated to ₹${tempPrices[variantId]} for variant ${variantId}`);
+    const newPrice = tempPrices[variantId];
+    console.log('Saving price for variant:', variantId, 'New price:', newPrice);
+    
+    // Update the local state to reflect the change
+    setUpdatedPrices(prev => ({
+      ...prev,
+      [variantId]: newPrice
+    }));
+    
+    toast({
+      title: "Price Updated",
+      description: `Price updated to ₹${newPrice} for variant ${variantId}`,
+    });
+    
     setEditingVariant(null);
   };
 
@@ -163,9 +177,11 @@ const PricingManagerTab = () => {
                                   })}
                                   className="w-20 h-7 text-xs"
                                 />
-                              ) : (
-                                <span className="font-bold text-terracotta">₹{trialVariant.price}</span>
-                              )}
+                               ) : (
+                                 <span className="font-bold text-terracotta">
+                                   ₹{updatedPrices[trialVariant.id] ?? trialVariant.price}
+                                 </span>
+                               )}
                             </div>
                             {trialVariant.originalPrice && (
                               <div className="text-xs text-muted-foreground line-through">
@@ -191,9 +207,11 @@ const PricingManagerTab = () => {
                                   })}
                                   className="w-20 h-7 text-xs"
                                 />
-                              ) : (
-                                <span className="font-bold text-terracotta">₹{variant250.price}</span>
-                              )}
+                               ) : (
+                                 <span className="font-bold text-terracotta">
+                                   ₹{updatedPrices[variant250.id] ?? variant250.price}
+                                 </span>
+                               )}
                             </div>
                             {variant250.originalPrice && (
                               <div className="text-xs text-muted-foreground line-through">
@@ -219,9 +237,11 @@ const PricingManagerTab = () => {
                                   })}
                                   className="w-20 h-7 text-xs"
                                 />
-                              ) : (
-                                <span className="font-bold text-terracotta">₹{variant500.price}</span>
-                              )}
+                               ) : (
+                                 <span className="font-bold text-terracotta">
+                                   ₹{updatedPrices[variant500.id] ?? variant500.price}
+                                 </span>
+                               )}
                             </div>
                             {variant500.originalPrice && (
                               <div className="text-xs text-muted-foreground line-through">
@@ -247,9 +267,11 @@ const PricingManagerTab = () => {
                                   })}
                                   className="w-20 h-7 text-xs"
                                 />
-                              ) : (
-                                <span className="font-bold text-terracotta">₹{variant1kg.price}</span>
-                              )}
+                               ) : (
+                                 <span className="font-bold text-terracotta">
+                                   ₹{updatedPrices[variant1kg.id] ?? variant1kg.price}
+                                 </span>
+                               )}
                             </div>
                             {variant1kg.originalPrice && (
                               <div className="text-xs text-muted-foreground line-through">

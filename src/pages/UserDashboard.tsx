@@ -29,30 +29,8 @@ const UserDashboard = () => {
     avatar: '',
   };
 
-  // Mock orders data
-  const orders = [
-    {
-      id: 'ORD-001',
-      date: '2024-01-15',
-      status: 'Delivered',
-      total: 89.99,
-      items: ['Handcrafted Ceramic Bowl Set', 'Wooden Cutting Board'],
-    },
-    {
-      id: 'ORD-002',
-      date: '2024-01-10',
-      status: 'Shipped',
-      total: 68.50,
-      items: ['Hand-Woven Wool Scarf'],
-    },
-    {
-      id: 'ORD-003',
-      date: '2024-01-05',
-      status: 'Processing',
-      total: 156.98,
-      items: ['Glass Bead Necklace', 'Ceramic Coffee Mug', 'Wooden Spoon Set'],
-    },
-  ];
+  // Real orders data - empty by default, will be populated from real orders
+  const orders: any[] = [];
 
   // Mock favorites data
   const favorites = [
@@ -86,22 +64,23 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-4 mb-6">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="bg-gradient-hero text-primary-foreground text-xl">
-              {user.name.split(' ').map(n => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-3xl font-bold">Welcome back, {user.name}!</h1>
-            <p className="text-muted-foreground">Member since {user.joinDate}</p>
+    <div className="min-h-screen flex flex-col">
+      <div className="container mx-auto px-4 py-8 flex-1">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-4 mb-6">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="bg-gradient-hero text-primary-foreground text-xl">
+                {user.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-3xl font-bold">Welcome back, {user.name}!</h1>
+              <p className="text-muted-foreground">Member since {user.joinDate}</p>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -176,38 +155,46 @@ const UserDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {orders.map((order) => (
-                  <div key={order.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <p className="font-semibold">{order.id}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(order.date).toLocaleDateString()}
-                          </p>
+                {orders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No orders found</p>
+                    <p className="text-sm text-muted-foreground">Your order history will appear here</p>
+                  </div>
+                ) : (
+                  orders.map((order) => (
+                    <div key={order.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <p className="font-semibold">{order.id}</p>
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(order.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                          <p className="text-lg font-bold mt-2">₹{order.total}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <Badge className={getStatusColor(order.status)}>
-                          {order.status}
-                        </Badge>
-                        <p className="text-lg font-bold mt-2">₹{order.total}</p>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Items:</p>
+                        <ul className="text-sm space-y-1">
+                          {order.items.map((item: string, index: number) => (
+                            <li key={index} className="flex items-center gap-2">
+                              <ShoppingBag className="h-3 w-3" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Items:</p>
-                      <ul className="text-sm space-y-1">
-                        {order.items.map((item, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <ShoppingBag className="h-3 w-3" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -239,10 +226,11 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-      <div className="mt-16">
-        <Footer />
+        </Tabs>
       </div>
+      
+      {/* Fixed Footer */}
+      <Footer />
     </div>
   );
 };
