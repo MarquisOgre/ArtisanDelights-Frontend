@@ -5,9 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import Footer from '@/components/Footer';
 import { 
   Package, 
-  Heart, 
   User, 
   MapPin, 
   Phone, 
@@ -105,10 +105,9 @@ const UserDashboard = () => {
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-[400px]">
+        <TabsList className="grid w-full grid-cols-3 lg:w-[300px]">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
-          <TabsTrigger value="favorites">Favorites</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -154,7 +153,14 @@ const UserDashboard = () => {
                 </div>
               </div>
               <Separator />
-              <Button variant="artisan">Edit Profile</Button>
+              <Button 
+                variant="artisan"
+                onClick={() => {
+                  alert('Edit Profile functionality will be implemented');
+                }}
+              >
+                Edit Profile
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -207,39 +213,6 @@ const UserDashboard = () => {
           </Card>
         </TabsContent>
 
-        {/* Favorites Tab */}
-        <TabsContent value="favorites" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                Your Favorites
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {favorites.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="aspect-square bg-muted rounded-md"></div>
-                    <div>
-                      <h3 className="font-semibold">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">by {item.artisan}</p>
-                      <p className="text-lg font-bold text-terracotta">₹{item.price}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="artisan" size="sm" className="flex-1">
-                        Add to Cart
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Heart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-6">
@@ -249,14 +222,14 @@ const UserDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    alert('Change Password functionality will be implemented');
+                  }}
+                >
                   Change Password
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Notification Preferences
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Privacy Settings
                 </Button>
                 <Separator />
                 <Button variant="destructive" className="w-full">
@@ -267,6 +240,7 @@ const UserDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      <Footer />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Footer from '@/components/Footer';
 import { 
   Package, 
   Users, 
@@ -16,7 +17,8 @@ import {
   Edit,
   Trash2,
   Eye,
-  BarChart3
+  BarChart3,
+  QrCode
 } from 'lucide-react';
 import { products, getBasePrice } from '@/data/products';
 import PricingManagerTab from '@/components/PricingManagerTab';
@@ -24,18 +26,16 @@ import PricingManagerTab from '@/components/PricingManagerTab';
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [upiQrCode, setUpiQrCode] = useState('/upi-qr-placeholder.png');
 
-  // Mock analytics data
+  // Real analytics data (currently showing 0 for real data)
   const analytics = {
-    totalRevenue: 15420.50,
-    totalOrders: 156,
+    totalRevenue: 0,
+    totalOrders: 0,
     totalProducts: products.length,
-    totalUsers: 89,
-    recentOrders: [
-      { id: 'ORD-001', customer: 'Sarah Johnson', amount: 89.99, status: 'Completed' },
-      { id: 'ORD-002', customer: 'Mike Chen', amount: 68.50, status: 'Processing' },
-      { id: 'ORD-003', customer: 'Emma Davis', amount: 156.98, status: 'Shipped' },
-    ],
+    totalUsers: 0,
+    activeUsers: 0,
+    recentOrders: [], // No dummy orders
   };
 
   const getStatusColor = (status: string) => {
@@ -61,13 +61,14 @@ const AdminDashboard = () => {
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 lg:w-[600px]">
+        <TabsList className="grid w-full grid-cols-7 lg:w-[700px]">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -131,22 +132,43 @@ const AdminDashboard = () => {
               <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {analytics.recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-semibold">{order.id}</p>
-                      <p className="text-sm text-muted-foreground">{order.customer}</p>
+              {analytics.recentOrders.length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No recent orders found</p>
+                  <p className="text-sm text-muted-foreground">Orders will appear here when customers place orders</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {analytics.recentOrders.map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-semibold">{order.id}</p>
+                        <p className="text-sm text-muted-foreground">{order.customer}</p>
+                      </div>
+                      <div className="text-right flex items-center gap-2">
+                        <div>
+                          <p className="font-bold">₹{order.amount}</p>
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" title="View Order">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Edit Order">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Delete Order">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold">₹{order.amount}</p>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -192,8 +214,8 @@ const AdminDashboard = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="artisan">Artisan</Label>
-                    <Input id="artisan" placeholder="Artisan name" />
+                    <Label htmlFor="brand">Brand</Label>
+                    <Input id="brand" placeholder="Brand name" defaultValue="ARTISAN DELIGHTS" />
                   </div>
                 </div>
                 <div>
@@ -227,7 +249,7 @@ const AdminDashboard = () => {
                     <tr>
                       <th className="text-left p-4">Product</th>
                       <th className="text-left p-4">Category</th>
-                      <th className="text-left p-4">Artisan</th>
+                      <th className="text-left p-4">Brand</th>
                       <th className="text-left p-4">Price</th>
                       <th className="text-left p-4">Stock</th>
                       <th className="text-left p-4">Actions</th>
@@ -238,12 +260,22 @@ const AdminDashboard = () => {
                       <tr key={product.id} className="border-b">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-muted rounded"></div>
-                            <span className="font-medium">{product.name}</span>
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-12 h-12 rounded object-cover cursor-pointer"
+                              onClick={() => window.location.href = `/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            />
+                            <span 
+                              className="font-medium cursor-pointer hover:text-terracotta"
+                              onClick={() => window.location.href = `/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            >
+                              {product.name}
+                            </span>
                           </div>
                         </td>
                         <td className="p-4">{product.category}</td>
-                        <td className="p-4">Artisan Delights</td>
+                        <td className="p-4">ARTISAN DELIGHTS</td>
                         <td className="p-4">₹{getBasePrice(product)}</td>
                         <td className="p-4">
                           <Badge variant={product.inStock ? "default" : "destructive"}>
@@ -255,7 +287,7 @@ const AdminDashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={() => console.log('View product:', product.id)}
+                              onClick={() => window.location.href = `/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
                               title="View Product"
                             >
                               <Eye className="h-4 w-4" />
@@ -263,7 +295,7 @@ const AdminDashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => console.log('Edit product:', product.id)}
+                              onClick={() => alert('Edit product functionality will be implemented')}
                               title="Edit Product"
                             >
                               <Edit className="h-4 w-4" />
@@ -271,7 +303,7 @@ const AdminDashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => console.log('Delete product:', product.id)}
+                              onClick={() => alert('Delete product functionality will be implemented')}
                               title="Delete Product"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -323,55 +355,72 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {analytics.recentOrders.map((order, index) => (
-                      <tr key={order.id} className="border-b hover:bg-muted/20">
-                        <td className="p-4 font-mono text-sm">{order.id}</td>
-                        <td className="p-4">
-                          <div>
-                            <p className="font-medium">{order.customer}</p>
-                            <p className="text-sm text-muted-foreground">customer{index + 1}@email.com</p>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-muted rounded"></div>
-                            <span className="text-sm">Idly Podi + 2 more</span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <span className="font-bold">₹{order.amount}</span>
-                        </td>
-                        <td className="p-4">
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
-                        </td>
-                        <td className="p-4 text-sm text-muted-foreground">
-                          {new Date().toLocaleDateString()}
-                        </td>
-                        <td className="p-4">
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" title="View Order">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" title="Edit Order">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Select>
-                              <SelectTrigger className="w-32 h-8">
-                                <SelectValue placeholder="Update Status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                    {analytics.recentOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center">
+                          <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground">No orders found</p>
+                          <p className="text-sm text-muted-foreground">Orders will appear here when customers place orders</p>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      analytics.recentOrders.map((order, index) => (
+                        <tr key={order.id} className="border-b hover:bg-muted/20">
+                          <td className="p-4 font-mono text-sm">{order.id}</td>
+                          <td className="p-4">
+                            <div>
+                              <p className="font-medium">{order.customer}</p>
+                              <p className="text-sm text-muted-foreground">customer{index + 1}@email.com</p>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-muted rounded"></div>
+                              <span className="text-sm">Idly Podi + 2 more</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className="font-bold">₹{order.amount}</span>
+                          </td>
+                          <td className="p-4">
+                            <Badge className={getStatusColor(order.status)}>
+                              {order.status}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-sm text-muted-foreground">
+                            {new Date().toLocaleDateString()}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                title="View Order"
+                                onClick={() => alert('View order functionality will be implemented')}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                title="Edit Order"
+                                onClick={() => alert('Edit order functionality will be implemented')}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                title="Delete Order"
+                                onClick={() => alert('Delete order functionality will be implemented')}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -415,7 +464,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Active Users</p>
-                    <p className="text-2xl font-bold text-sage">76</p>
+                    <p className="text-2xl font-bold text-sage">{analytics.activeUsers}</p>
                   </div>
                   <Users className="h-8 w-8 text-sage" />
                 </div>
@@ -426,7 +475,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">New This Month</p>
-                    <p className="text-2xl font-bold text-terracotta">13</p>
+                    <p className="text-2xl font-bold text-terracotta">0</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-terracotta" />
                 </div>
@@ -437,7 +486,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Premium Users</p>
-                    <p className="text-2xl font-bold text-warm-brown">24</p>
+                    <p className="text-2xl font-bold text-warm-brown">0</p>
                   </div>
                   <Users className="h-8 w-8 text-warm-brown" />
                 </div>
@@ -448,61 +497,27 @@ const AdminDashboard = () => {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4">User</th>
-                      <th className="text-left p-4">Email</th>
-                      <th className="text-left p-4">Orders</th>
-                      <th className="text-left p-4">Total Spent</th>
-                      <th className="text-left p-4">Status</th>
-                      <th className="text-left p-4">Joined</th>
-                      <th className="text-left p-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { name: 'Rajesh Kumar', email: 'rajesh@email.com', orders: 12, spent: 2450, status: 'Active', joined: '2024-01-15' },
-                      { name: 'Priya Sharma', email: 'priya@email.com', orders: 8, spent: 1890, status: 'Active', joined: '2024-02-20' },
-                      { name: 'Suresh Reddy', email: 'suresh@email.com', orders: 15, spent: 3200, status: 'Premium', joined: '2023-12-10' },
-                      { name: 'Meera Iyer', email: 'meera@email.com', orders: 5, spent: 980, status: 'Active', joined: '2024-03-05' },
-                    ].map((user, index) => (
-                      <tr key={index} className="border-b hover:bg-muted/20">
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-terracotta to-warm-brown rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-sm">
-                                {user.name.split(' ').map(n => n[0]).join('')}
-                              </span>
-                            </div>
-                            <span className="font-medium">{user.name}</span>
-                          </div>
-                        </td>
-                        <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
-                        <td className="p-4">{user.orders}</td>
-                        <td className="p-4 font-semibold">₹{user.spent}</td>
-                        <td className="p-4">
-                          <Badge className={user.status === 'Premium' ? 'bg-terracotta text-white' : 'bg-sage text-white'}>
-                            {user.status}
-                          </Badge>
-                        </td>
-                        <td className="p-4 text-sm text-muted-foreground">{user.joined}</td>
-                        <td className="p-4">
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" title="View Profile">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" title="Edit User">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" title="Deactivate">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+                 <table className="w-full">
+                   <thead className="border-b bg-muted/50">
+                     <tr>
+                       <th className="text-left p-4">User</th>
+                       <th className="text-left p-4">Email</th>
+                       <th className="text-left p-4">Orders</th>
+                       <th className="text-left p-4">Total Spent</th>
+                       <th className="text-left p-4">Status</th>
+                       <th className="text-left p-4">Joined</th>
+                       <th className="text-left p-4">Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     <tr>
+                       <td colSpan={7} className="p-8 text-center">
+                         <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                         <p className="text-muted-foreground">No users found</p>
+                         <p className="text-sm text-muted-foreground">Real user data will appear here when users register</p>
+                       </td>
+                     </tr>
+                   </tbody>
                 </table>
               </div>
             </CardContent>
@@ -520,8 +535,8 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Conversion Rate</p>
-                    <p className="text-2xl font-bold text-sage">12.5%</p>
-                    <p className="text-xs text-sage">+2.3% from last month</p>
+                    <p className="text-2xl font-bold text-sage">0%</p>
+                    <p className="text-xs text-sage">No data available</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-sage" />
                 </div>
@@ -532,8 +547,8 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Avg Order Value</p>
-                    <p className="text-2xl font-bold text-terracotta">₹98.80</p>
-                    <p className="text-xs text-terracotta">+₹12 from last month</p>
+                    <p className="text-2xl font-bold text-terracotta">₹0</p>
+                    <p className="text-xs text-terracotta">No orders yet</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-terracotta" />
                 </div>
@@ -544,8 +559,8 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Customer Retention</p>
-                    <p className="text-2xl font-bold text-warm-brown">84.2%</p>
-                    <p className="text-xs text-warm-brown">+1.5% from last month</p>
+                    <p className="text-2xl font-bold text-warm-brown">0%</p>
+                    <p className="text-xs text-warm-brown">No customer data</p>
                   </div>
                   <Users className="h-8 w-8 text-warm-brown" />
                 </div>
@@ -556,8 +571,8 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Return Rate</p>
-                    <p className="text-2xl font-bold text-soft-beige">2.1%</p>
-                    <p className="text-xs text-soft-beige">-0.3% from last month</p>
+                    <p className="text-2xl font-bold text-soft-beige">0%</p>
+                    <p className="text-xs text-soft-beige">No returns yet</p>
                   </div>
                   <Package className="h-8 w-8 text-soft-beige" />
                 </div>
@@ -577,8 +592,8 @@ const AdminDashboard = () => {
                 <div className="h-64 bg-gradient-to-br from-terracotta/10 to-warm-brown/10 rounded flex items-center justify-center border-2 border-dashed border-terracotta/20">
                   <div className="text-center">
                     <BarChart3 className="h-12 w-12 text-terracotta/40 mx-auto mb-2" />
-                    <p className="text-muted-foreground">Sales chart visualization</p>
-                    <p className="text-sm text-muted-foreground">Daily revenue tracking</p>
+                    <p className="text-muted-foreground">No sales data available</p>
+                    <p className="text-sm text-muted-foreground">Charts will appear when orders are placed</p>
                   </div>
                 </div>
               </CardContent>
@@ -597,15 +612,15 @@ const AdminDashboard = () => {
                     { name: 'Sambar Powder', sales: 189, revenue: 9450, growth: '+8%' },
                     { name: 'Palli Podi', sales: 156, revenue: 7800, growth: '+22%' },
                     { name: 'Curry Leaves Podi', sales: 134, revenue: 6700, growth: '+12%' },
-                  ].map((product, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">{product.sales} units sold</p>
+                   ].map((product, index) => (
+                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                       <div>
+                         <p className="font-medium">{product.name}</p>
+                         <p className="text-sm text-muted-foreground">Real data will be shown here</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">₹{product.revenue}</p>
-                        <p className="text-sm text-sage">{product.growth}</p>
+                       <div className="text-right">
+                         <p className="font-bold">₹0</p>
+                         <p className="text-sm text-sage">No data yet</p>
                       </div>
                     </div>
                   ))}
@@ -623,18 +638,18 @@ const AdminDashboard = () => {
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Top Customer Segment</h4>
-                  <p className="text-2xl font-bold text-terracotta">Age 25-35</p>
-                  <p className="text-sm text-muted-foreground">42% of total customers</p>
+                  <p className="text-2xl font-bold text-terracotta">No Data</p>
+                  <p className="text-sm text-muted-foreground">0% of total customers</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Peak Order Time</h4>
-                  <p className="text-2xl font-bold text-sage">10 AM - 2 PM</p>
-                  <p className="text-sm text-muted-foreground">35% of daily orders</p>
+                  <p className="text-2xl font-bold text-sage">No Data</p>
+                  <p className="text-sm text-muted-foreground">0% of daily orders</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Repeat Purchase Rate</h4>
-                  <p className="text-2xl font-bold text-warm-brown">68%</p>
-                  <p className="text-sm text-muted-foreground">Within 3 months</p>
+                  <p className="text-2xl font-bold text-warm-brown">0%</p>
+                  <p className="text-sm text-muted-foreground">No repeat customers yet</p>
                 </div>
               </div>
             </CardContent>

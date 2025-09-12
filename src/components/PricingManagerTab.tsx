@@ -19,6 +19,8 @@ const PricingManagerTab = () => {
 
   const handleSavePrice = (variantId: string) => {
     console.log('Saving price for variant:', variantId, 'New price:', tempPrices[variantId]);
+    // TODO: Update the actual product price in database
+    alert(`Price updated to ₹${tempPrices[variantId]} for variant ${variantId}`);
     setEditingVariant(null);
   };
 
@@ -47,7 +49,10 @@ const PricingManagerTab = () => {
               <SelectItem value="regular">Regular Price</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="artisan">
+          <Button 
+            variant="artisan"
+            onClick={() => alert('Bulk discount functionality will be implemented')}
+          >
             Apply Bulk Discount
           </Button>
         </div>
@@ -321,21 +326,43 @@ const PricingManagerTab = () => {
               <Label>Apply Discount to All</Label>
               <div className="flex gap-2">
                 <Input placeholder="Discount %" type="number" />
-                <Button variant="outline">Apply</Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => alert('Bulk discount functionality will be implemented')}
+                >
+                  Apply
+                </Button>
               </div>
             </div>
             <div className="space-y-4">
               <Label>Price Increase</Label>
               <div className="flex gap-2">
                 <Input placeholder="Increase %" type="number" />
-                <Button variant="outline">Apply</Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => alert('Price increase functionality will be implemented')}
+                >
+                  Apply
+                </Button>
               </div>
             </div>
             <div className="space-y-4">
               <Label>Quick Actions</Label>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">Remove All Discounts</Button>
-                <Button variant="outline" size="sm">Festival Pricing</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => alert('Remove discounts functionality will be implemented')}
+                >
+                  Remove All Discounts
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => alert('Festival pricing functionality will be implemented')}
+                >
+                  Festival Pricing
+                </Button>
               </div>
             </div>
           </div>
