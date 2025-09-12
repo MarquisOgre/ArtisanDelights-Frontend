@@ -22,6 +22,29 @@ export const useAuth = () => {
       }
     }
     setIsLoading(false);
+
+    // Listen for auth state changes
+    const handleAuthStateChange = () => {
+      const updatedUser = localStorage.getItem('user');
+      if (updatedUser) {
+        try {
+          setUser(JSON.parse(updatedUser));
+        } catch (error) {
+          localStorage.removeItem('user');
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('authStateChanged', handleAuthStateChange);
+    window.addEventListener('storage', handleAuthStateChange);
+
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthStateChange);
+      window.removeEventListener('storage', handleAuthStateChange);
+    };
   }, []);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {

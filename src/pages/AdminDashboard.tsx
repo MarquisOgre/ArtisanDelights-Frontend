@@ -61,12 +61,11 @@ const AdminDashboard = () => {
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 lg:w-[700px]">
+        <TabsList className="grid w-full grid-cols-6 lg:w-[600px]">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
@@ -660,7 +659,45 @@ const AdminDashboard = () => {
         <TabsContent value="pricing">
           <PricingManagerTab />
         </TabsContent>
+
+        {/* Settings Tab */}
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <QrCode className="h-5 w-5" />
+                System Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">UPI Payment Settings</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Current UPI QR Code</label>
+                    <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+                      <img 
+                        src={upiQrCode} 
+                        alt="UPI QR Code" 
+                        className="w-32 h-32 mx-auto"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    variant="artisan"
+                    onClick={() => {
+                      alert('UPI QR Code update functionality will be implemented');
+                    }}
+                  >
+                    Update UPI QR Code
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+      <Footer />
     </div>
   );
 };

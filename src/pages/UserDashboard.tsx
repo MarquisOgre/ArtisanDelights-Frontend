@@ -240,7 +240,9 @@ const UserDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      <Footer />
+      <div className="mt-16">
+        <Footer />
+      </div>
     </div>
   );
 };
