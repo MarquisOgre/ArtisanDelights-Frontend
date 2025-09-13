@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,7 +27,10 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [upiQrCode, setUpiQrCode] = useState('/upi-qr-placeholder.png');
-  const [displayProducts, setDisplayProducts] = useState(products);
+  const [displayProducts, setDisplayProducts] = useState(() => {
+    const saved = localStorage.getItem('adminProducts');
+    return saved ? JSON.parse(saved) : products;
+  });
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -45,6 +48,11 @@ const AdminDashboard = () => {
     description: '',
     image: ''
   });
+
+  // Save products to localStorage whenever displayProducts changes
+  useEffect(() => {
+    localStorage.setItem('adminProducts', JSON.stringify(displayProducts));
+  }, [displayProducts]);
 
   // Real analytics data (currently showing 0 for real data)
   const analytics = {
@@ -844,7 +852,7 @@ const AdminDashboard = () => {
 
         {/* Pricing Tab */}
         <TabsContent value="pricing">
-          <PricingManagerTab />
+          <PricingManagerTab products={displayProducts} />
         </TabsContent>
 
         {/* Settings Tab */}

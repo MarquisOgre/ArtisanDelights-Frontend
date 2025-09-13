@@ -5,11 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { products } from '@/data/products';
+import { products as defaultProducts } from '@/data/products';
 import { Edit, Save, X, TrendingUp, TrendingDown, Percent } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const PricingManagerTab = () => {
+interface PricingManagerTabProps {
+  products?: any[];
+}
+
+const PricingManagerTab = ({ products = defaultProducts }: PricingManagerTabProps) => {
   const [editingVariant, setEditingVariant] = useState<string | null>(null);
   const [tempPrices, setTempPrices] = useState<{ [key: string]: number }>({});
   const [updatedPrices, setUpdatedPrices] = useState<{ [key: string]: number }>({});
