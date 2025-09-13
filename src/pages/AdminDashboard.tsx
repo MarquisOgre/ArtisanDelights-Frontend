@@ -33,20 +33,30 @@ const AdminDashboard = () => {
   });
   const [newProduct, setNewProduct] = useState({
     name: '',
-    price: '',
     category: '',
     brand: 'ARTISAN DELIGHTS',
     description: '',
-    image: ''
+    image: '',
+    variants: {
+      trial: { size: 'Trial Pack', weight: '50g', price: '' },
+      small: { size: '250g', weight: '250g', price: '' },
+      medium: { size: '500g', weight: '500g', price: '' },
+      large: { size: '1 KG', weight: '1000g', price: '' }
+    }
   });
   const [editingProduct, setEditingProduct] = useState(null);
   const [editProduct, setEditProduct] = useState({
     name: '',
-    price: '',
     category: '',
     brand: '',
     description: '',
-    image: ''
+    image: '',
+    variants: {
+      trial: { size: 'Trial Pack', weight: '50g', price: '' },
+      small: { size: '250g', weight: '250g', price: '' },
+      medium: { size: '500g', weight: '500g', price: '' },
+      large: { size: '1 KG', weight: '1000g', price: '' }
+    }
   });
 
   // Save products to localStorage whenever displayProducts changes
@@ -230,16 +240,6 @@ const AdminDashboard = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="price">Base Price (₹)</Label>
-                    <Input 
-                      id="price" 
-                      type="number" 
-                      placeholder="150"
-                      value={newProduct.price}
-                      onChange={(e) => setNewProduct(prev => ({ ...prev, price: e.target.value }))}
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="category">Category</Label>
                     <Select value={newProduct.category} onValueChange={(value) => setNewProduct(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
@@ -258,6 +258,77 @@ const AdminDashboard = () => {
                       value={newProduct.brand}
                       onChange={(e) => setNewProduct(prev => ({ ...prev, brand: e.target.value }))}
                     />
+                  </div>
+                </div>
+
+                {/* Product Variants Pricing */}
+                <div>
+                  <Label className="text-lg font-semibold">Product Variants & Pricing</Label>
+                  <div className="grid md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                      <Label htmlFor="trialPrice">Trial Pack (50g) - Price (₹)</Label>
+                      <Input 
+                        id="trialPrice" 
+                        type="number" 
+                        placeholder="50"
+                        value={newProduct.variants.trial.price}
+                        onChange={(e) => setNewProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            trial: { ...prev.variants.trial, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="smallPrice">250g Pack - Price (₹)</Label>
+                      <Input 
+                        id="smallPrice" 
+                        type="number" 
+                        placeholder="150"
+                        value={newProduct.variants.small.price}
+                        onChange={(e) => setNewProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            small: { ...prev.variants.small, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="mediumPrice">500g Pack - Price (₹)</Label>
+                      <Input 
+                        id="mediumPrice" 
+                        type="number" 
+                        placeholder="280"
+                        value={newProduct.variants.medium.price}
+                        onChange={(e) => setNewProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            medium: { ...prev.variants.medium, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="largePrice">1 KG Pack - Price (₹)</Label>
+                      <Input 
+                        id="largePrice" 
+                        type="number" 
+                        placeholder="520"
+                        value={newProduct.variants.large.price}
+                        onChange={(e) => setNewProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            large: { ...prev.variants.large, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -285,7 +356,18 @@ const AdminDashboard = () => {
                   <Button 
                     variant="artisan"
                     onClick={() => {
-                      if (newProduct.name && newProduct.price && newProduct.category && newProduct.description) {
+                      const hasValidVariants = Object.values(newProduct.variants).some(variant => variant.price && parseInt(variant.price) > 0);
+                      
+                      if (newProduct.name && newProduct.category && newProduct.description && hasValidVariants) {
+                        const productVariants = Object.entries(newProduct.variants)
+                          .filter(([key, variant]) => variant.price && parseInt(variant.price) > 0)
+                          .map(([key, variant]) => ({
+                            id: variant.weight,
+                            size: variant.size,
+                            weight: variant.weight,
+                            price: parseInt(variant.price)
+                          }));
+
                         const productToAdd = {
                           id: `new-${Date.now()}`,
                           name: newProduct.name,
@@ -295,21 +377,26 @@ const AdminDashboard = () => {
                           image: newProduct.image || '/podi-collection.jpg',
                           inStock: true,
                           featured: false,
-                          variants: [
-                            {
-                              id: '100g',
-                              size: '100g',
-                              weight: '100g',
-                              price: parseInt(newProduct.price)
-                            }
-                          ]
+                          variants: productVariants
                         };
                         setDisplayProducts(prev => [...prev, productToAdd]);
-                        setNewProduct({ name: '', price: '', category: '', brand: 'ARTISAN DELIGHTS', description: '', image: '' });
+                        setNewProduct({ 
+                          name: '', 
+                          category: '', 
+                          brand: 'ARTISAN DELIGHTS', 
+                          description: '', 
+                          image: '',
+                          variants: {
+                            trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                            small: { size: '250g', weight: '250g', price: '' },
+                            medium: { size: '500g', weight: '500g', price: '' },
+                            large: { size: '1 KG', weight: '1000g', price: '' }
+                          }
+                        });
                         setIsAddingProduct(false);
-                        alert('Product added successfully!');
+                        alert('Product added successfully with all variants!');
                       } else {
-                        alert('Please fill in all required fields');
+                        alert('Please fill in product name, category, description, and at least one variant price');
                       }
                     }}
                   >
@@ -317,7 +404,19 @@ const AdminDashboard = () => {
                   </Button>
                   <Button variant="outline" onClick={() => {
                     setIsAddingProduct(false);
-                    setNewProduct({ name: '', price: '', category: '', brand: 'ARTISAN DELIGHTS', description: '', image: '' });
+                    setNewProduct({ 
+                      name: '', 
+                      category: '', 
+                      brand: 'ARTISAN DELIGHTS', 
+                      description: '', 
+                      image: '',
+                      variants: {
+                        trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                        small: { size: '250g', weight: '250g', price: '' },
+                        medium: { size: '500g', weight: '500g', price: '' },
+                        large: { size: '1 KG', weight: '1000g', price: '' }
+                      }
+                    });
                   }}>
                     Cancel
                   </Button>
@@ -343,16 +442,6 @@ const AdminDashboard = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="editPrice">Base Price (₹)</Label>
-                    <Input 
-                      id="editPrice" 
-                      type="number" 
-                      placeholder="150"
-                      value={editProduct.price}
-                      onChange={(e) => setEditProduct(prev => ({ ...prev, price: e.target.value }))}
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="editCategory">Category</Label>
                     <Select value={editProduct.category} onValueChange={(value) => setEditProduct(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
@@ -373,6 +462,78 @@ const AdminDashboard = () => {
                     />
                   </div>
                 </div>
+
+                {/* Edit Product Variants Pricing */}
+                <div>
+                  <Label className="text-lg font-semibold">Product Variants & Pricing</Label>
+                  <div className="grid md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                      <Label htmlFor="editTrialPrice">Trial Pack (50g) - Price (₹)</Label>
+                      <Input 
+                        id="editTrialPrice" 
+                        type="number" 
+                        placeholder="50"
+                        value={editProduct.variants.trial.price}
+                        onChange={(e) => setEditProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            trial: { ...prev.variants.trial, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editSmallPrice">250g Pack - Price (₹)</Label>
+                      <Input 
+                        id="editSmallPrice" 
+                        type="number" 
+                        placeholder="150"
+                        value={editProduct.variants.small.price}
+                        onChange={(e) => setEditProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            small: { ...prev.variants.small, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editMediumPrice">500g Pack - Price (₹)</Label>
+                      <Input 
+                        id="editMediumPrice" 
+                        type="number" 
+                        placeholder="280"
+                        value={editProduct.variants.medium.price}
+                        onChange={(e) => setEditProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            medium: { ...prev.variants.medium, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editLargePrice">1 KG Pack - Price (₹)</Label>
+                      <Input 
+                        id="editLargePrice" 
+                        type="number" 
+                        placeholder="520"
+                        value={editProduct.variants.large.price}
+                        onChange={(e) => setEditProduct(prev => ({ 
+                          ...prev, 
+                          variants: { 
+                            ...prev.variants, 
+                            large: { ...prev.variants.large, price: e.target.value } 
+                          } 
+                        }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <Label htmlFor="editImage">Product Image URL</Label>
                   <Input 
@@ -395,7 +556,18 @@ const AdminDashboard = () => {
                   <Button 
                     variant="artisan"
                     onClick={() => {
-                      if (editProduct.name && editProduct.price && editProduct.category && editProduct.description) {
+                      const hasValidVariants = Object.values(editProduct.variants).some(variant => variant.price && parseInt(variant.price) > 0);
+                      
+                      if (editProduct.name && editProduct.category && editProduct.description && hasValidVariants) {
+                        const updatedVariants = Object.entries(editProduct.variants)
+                          .filter(([key, variant]) => variant.price && parseInt(variant.price) > 0)
+                          .map(([key, variant]) => ({
+                            id: variant.weight,
+                            size: variant.size,
+                            weight: variant.weight,
+                            price: parseInt(variant.price)
+                          }));
+
                         setDisplayProducts(prev => prev.map(product => 
                           product.id === editingProduct.id 
                             ? {
@@ -403,18 +575,27 @@ const AdminDashboard = () => {
                                 name: editProduct.name,
                                 description: editProduct.description,
                                 image: editProduct.image || product.image,
-                                variants: product.variants.map(variant => ({
-                                  ...variant,
-                                  price: parseInt(editProduct.price)
-                                }))
+                                variants: updatedVariants
                               }
                             : product
                         ));
                         setEditingProduct(null);
-                        setEditProduct({ name: '', price: '', category: '', brand: '', description: '', image: '' });
+                        setEditProduct({ 
+                          name: '', 
+                          category: '', 
+                          brand: '', 
+                          description: '', 
+                          image: '',
+                          variants: {
+                            trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                            small: { size: '250g', weight: '250g', price: '' },
+                            medium: { size: '500g', weight: '500g', price: '' },
+                            large: { size: '1 KG', weight: '1000g', price: '' }
+                          }
+                        });
                         alert('Product updated successfully!');
                       } else {
-                        alert('Please fill in all required fields');
+                        alert('Please fill in product name, category, description, and at least one variant price');
                       }
                     }}
                   >
@@ -422,7 +603,19 @@ const AdminDashboard = () => {
                   </Button>
                   <Button variant="outline" onClick={() => {
                     setEditingProduct(null);
-                    setEditProduct({ name: '', price: '', category: '', brand: '', description: '', image: '' });
+                    setEditProduct({ 
+                      name: '', 
+                      category: '', 
+                      brand: '', 
+                      description: '', 
+                      image: '',
+                      variants: {
+                        trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                        small: { size: '250g', weight: '250g', price: '' },
+                        medium: { size: '500g', weight: '500g', price: '' },
+                        large: { size: '1 KG', weight: '1000g', price: '' }
+                      }
+                    });
                   }}>
                     Cancel
                   </Button>
@@ -487,13 +680,29 @@ const AdminDashboard = () => {
                               size="sm"
                               onClick={() => {
                                 setEditingProduct(product);
+                                // Convert existing variants back to the edit format
+                                const editVariants = {
+                                  trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                                  small: { size: '250g', weight: '250g', price: '' },
+                                  medium: { size: '500g', weight: '500g', price: '' },
+                                  large: { size: '1 KG', weight: '1000g', price: '' }
+                                };
+                                
+                                // Fill in existing variant prices
+                                product.variants.forEach(variant => {
+                                  if (variant.weight === '50g') editVariants.trial.price = variant.price.toString();
+                                  if (variant.weight === '250g') editVariants.small.price = variant.price.toString();
+                                  if (variant.weight === '500g') editVariants.medium.price = variant.price.toString();
+                                  if (variant.weight === '1000g') editVariants.large.price = variant.price.toString();
+                                });
+
                                 setEditProduct({
                                   name: product.name,
-                                  price: getBasePrice(product).toString(),
                                   category: product.category,
                                   brand: 'ARTISAN DELIGHTS',
                                   description: product.description,
-                                  image: product.image
+                                  image: product.image,
+                                  variants: editVariants
                                 });
                               }}
                               title="Edit Product"
