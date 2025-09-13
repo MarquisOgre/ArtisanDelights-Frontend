@@ -33,7 +33,17 @@ const AdminDashboard = () => {
     price: '',
     category: '',
     brand: 'ARTISAN DELIGHTS',
-    description: ''
+    description: '',
+    image: ''
+  });
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editProduct, setEditProduct] = useState({
+    name: '',
+    price: '',
+    category: '',
+    brand: '',
+    description: '',
+    image: ''
   });
 
   // Real analytics data (currently showing 0 for real data)
@@ -243,6 +253,18 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div>
+                  <Label htmlFor="image">Product Image URL</Label>
+                  <Input 
+                    id="image" 
+                    placeholder="Enter image URL or path"
+                    value={newProduct.image}
+                    onChange={(e) => setNewProduct(prev => ({ ...prev, image: e.target.value }))}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Add image URL or use default: /podi-collection.jpg
+                  </p>
+                </div>
+                <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea 
                     id="description" 
@@ -262,7 +284,7 @@ const AdminDashboard = () => {
                           slug: newProduct.name.toLowerCase().replace(/\s+/g, '-'),
                           category: newProduct.category,
                           description: newProduct.description,
-                          image: '/podi-collection.jpg', // Default image
+                          image: newProduct.image || '/podi-collection.jpg',
                           inStock: true,
                           featured: false,
                           variants: [
@@ -275,7 +297,7 @@ const AdminDashboard = () => {
                           ]
                         };
                         setDisplayProducts(prev => [...prev, productToAdd]);
-                        setNewProduct({ name: '', price: '', category: '', brand: 'ARTISAN DELIGHTS', description: '' });
+                        setNewProduct({ name: '', price: '', category: '', brand: 'ARTISAN DELIGHTS', description: '', image: '' });
                         setIsAddingProduct(false);
                         alert('Product added successfully!');
                       } else {
@@ -285,7 +307,115 @@ const AdminDashboard = () => {
                   >
                     Save Product
                   </Button>
-                  <Button variant="outline" onClick={() => setIsAddingProduct(false)}>
+                  <Button variant="outline" onClick={() => {
+                    setIsAddingProduct(false);
+                    setNewProduct({ name: '', price: '', category: '', brand: 'ARTISAN DELIGHTS', description: '', image: '' });
+                  }}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {editingProduct && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Edit Product</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editProductName">Product Name</Label>
+                    <Input 
+                      id="editProductName" 
+                      placeholder="Enter product name"
+                      value={editProduct.name}
+                      onChange={(e) => setEditProduct(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editPrice">Base Price (₹)</Label>
+                    <Input 
+                      id="editPrice" 
+                      type="number" 
+                      placeholder="150"
+                      value={editProduct.price}
+                      onChange={(e) => setEditProduct(prev => ({ ...prev, price: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editCategory">Category</Label>
+                    <Select value={editProduct.category} onValueChange={(value) => setEditProduct(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="traditional-podis">Traditional Podis</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editBrand">Brand</Label>
+                    <Input 
+                      id="editBrand" 
+                      placeholder="Brand name" 
+                      value={editProduct.brand}
+                      onChange={(e) => setEditProduct(prev => ({ ...prev, brand: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="editImage">Product Image URL</Label>
+                  <Input 
+                    id="editImage" 
+                    placeholder="Enter image URL or path"
+                    value={editProduct.image}
+                    onChange={(e) => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editDescription">Description</Label>
+                  <Textarea 
+                    id="editDescription" 
+                    placeholder="Product description"
+                    value={editProduct.description}
+                    onChange={(e) => setEditProduct(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="artisan"
+                    onClick={() => {
+                      if (editProduct.name && editProduct.price && editProduct.category && editProduct.description) {
+                        setDisplayProducts(prev => prev.map(product => 
+                          product.id === editingProduct.id 
+                            ? {
+                                ...product,
+                                name: editProduct.name,
+                                description: editProduct.description,
+                                image: editProduct.image || product.image,
+                                variants: product.variants.map(variant => ({
+                                  ...variant,
+                                  price: parseInt(editProduct.price)
+                                }))
+                              }
+                            : product
+                        ));
+                        setEditingProduct(null);
+                        setEditProduct({ name: '', price: '', category: '', brand: '', description: '', image: '' });
+                        alert('Product updated successfully!');
+                      } else {
+                        alert('Please fill in all required fields');
+                      }
+                    }}
+                  >
+                    Update Product
+                  </Button>
+                  <Button variant="outline" onClick={() => {
+                    setEditingProduct(null);
+                    setEditProduct({ name: '', price: '', category: '', brand: '', description: '', image: '' });
+                  }}>
                     Cancel
                   </Button>
                 </div>
@@ -347,7 +477,17 @@ const AdminDashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => alert('Edit product functionality will be implemented')}
+                              onClick={() => {
+                                setEditingProduct(product);
+                                setEditProduct({
+                                  name: product.name,
+                                  price: getBasePrice(product).toString(),
+                                  category: product.category,
+                                  brand: 'ARTISAN DELIGHTS',
+                                  description: product.description,
+                                  image: product.image
+                                });
+                              }}
                               title="Edit Product"
                             >
                               <Edit className="h-4 w-4" />
@@ -355,7 +495,12 @@ const AdminDashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => alert('Delete product functionality will be implemented')}
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
+                                  setDisplayProducts(prev => prev.filter(p => p.id !== product.id));
+                                  alert('Product deleted successfully!');
+                                }
+                              }}
                               title="Delete Product"
                             >
                               <Trash2 className="h-4 w-4" />
