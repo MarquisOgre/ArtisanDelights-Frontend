@@ -27,6 +27,14 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [upiQrCode, setUpiQrCode] = useState('/upi-qr-placeholder.png');
+  const [displayProducts, setDisplayProducts] = useState(products);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    category: '',
+    brand: 'ARTISAN DELIGHTS',
+    description: ''
+  });
 
   // Real analytics data (currently showing 0 for real data)
   const analytics = {
@@ -196,15 +204,26 @@ const AdminDashboard = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="productName">Product Name</Label>
-                    <Input id="productName" placeholder="Enter product name" />
+                    <Input 
+                      id="productName" 
+                      placeholder="Enter product name"
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct(prev => ({ ...prev, name: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="price">Base Price (₹)</Label>
-                    <Input id="price" type="number" placeholder="150" />
+                    <Input 
+                      id="price" 
+                      type="number" 
+                      placeholder="150"
+                      value={newProduct.price}
+                      onChange={(e) => setNewProduct(prev => ({ ...prev, price: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select>
+                    <Select value={newProduct.category} onValueChange={(value) => setNewProduct(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -215,20 +234,53 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <Label htmlFor="brand">Brand</Label>
-                    <Input id="brand" placeholder="Brand name" defaultValue="ARTISAN DELIGHTS" />
+                    <Input 
+                      id="brand" 
+                      placeholder="Brand name" 
+                      value={newProduct.brand}
+                      onChange={(e) => setNewProduct(prev => ({ ...prev, brand: e.target.value }))}
+                    />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" placeholder="Product description" />
+                  <Textarea 
+                    id="description" 
+                    placeholder="Product description"
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct(prev => ({ ...prev, description: e.target.value }))}
+                  />
                 </div>
                 <div className="flex gap-2">
                   <Button 
                     variant="artisan"
                     onClick={() => {
-                      console.log('Saving new product...');
-                      setIsAddingProduct(false);
-                      alert('Product saved successfully!');
+                      if (newProduct.name && newProduct.price && newProduct.category && newProduct.description) {
+                        const productToAdd = {
+                          id: `new-${Date.now()}`,
+                          name: newProduct.name,
+                          slug: newProduct.name.toLowerCase().replace(/\s+/g, '-'),
+                          category: newProduct.category,
+                          description: newProduct.description,
+                          image: '/podi-collection.jpg', // Default image
+                          inStock: true,
+                          featured: false,
+                          variants: [
+                            {
+                              id: '100g',
+                              size: '100g',
+                              weight: '100g',
+                              price: parseInt(newProduct.price)
+                            }
+                          ]
+                        };
+                        setDisplayProducts(prev => [...prev, productToAdd]);
+                        setNewProduct({ name: '', price: '', category: '', brand: 'ARTISAN DELIGHTS', description: '' });
+                        setIsAddingProduct(false);
+                        alert('Product added successfully!');
+                      } else {
+                        alert('Please fill in all required fields');
+                      }
                     }}
                   >
                     Save Product
@@ -256,7 +308,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product) => (
+                    {displayProducts.map((product) => (
                       <tr key={product.id} className="border-b">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
