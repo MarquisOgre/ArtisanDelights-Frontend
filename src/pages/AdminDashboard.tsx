@@ -41,7 +41,7 @@ const AdminDashboard = () => {
       trial: { size: 'Trial Pack', weight: '50g', price: '' },
       small: { size: '250g', weight: '250g', price: '' },
       medium: { size: '500g', weight: '500g', price: '' },
-      large: { size: '1 KG', weight: '1000g', price: '' }
+      large: { size: '1kg', weight: '1000g', price: '' }
     }
   });
   const [editingProduct, setEditingProduct] = useState(null);
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
       trial: { size: 'Trial Pack', weight: '50g', price: '' },
       small: { size: '250g', weight: '250g', price: '' },
       medium: { size: '500g', weight: '500g', price: '' },
-      large: { size: '1 KG', weight: '1000g', price: '' }
+      large: { size: '1kg', weight: '1000g', price: '' }
     }
   });
 
@@ -250,15 +250,33 @@ const AdminDashboard = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div>
-                    <Label htmlFor="brand">Brand</Label>
-                    <Input 
-                      id="brand" 
-                      placeholder="Brand name" 
-                      value={newProduct.brand}
-                      onChange={(e) => setNewProduct(prev => ({ ...prev, brand: e.target.value }))}
-                    />
+                    <div>
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input 
+                        id="brand" 
+                        placeholder="Brand name" 
+                        value={newProduct.brand}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, brand: e.target.value }))}/>
+                    </div>
                   </div>
+
+
+                  <div>
+                    <div>
+                      <Label htmlFor="image">Product Image URL</Label>
+                      <Input 
+                        id="image" 
+                        placeholder="Enter image URL or path"
+                        value={newProduct.image}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, image: e.target.value }))}
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Add image URL or use default: /podi-collection.jpg
+                      </p>
+                    </div>
+                  </div>                
                 </div>
 
                 {/* Product Variants Pricing */}
@@ -332,18 +350,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="image">Product Image URL</Label>
-                  <Input 
-                    id="image" 
-                    placeholder="Enter image URL or path"
-                    value={newProduct.image}
-                    onChange={(e) => setNewProduct(prev => ({ ...prev, image: e.target.value }))}
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Add image URL or use default: /podi-collection.jpg
-                  </p>
-                </div>
-                <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea 
                     id="description" 
@@ -390,7 +396,7 @@ const AdminDashboard = () => {
                             trial: { size: 'Trial Pack', weight: '50g', price: '' },
                             small: { size: '250g', weight: '250g', price: '' },
                             medium: { size: '500g', weight: '500g', price: '' },
-                            large: { size: '1 KG', weight: '1000g', price: '' }
+                            large: { size: '1kg', weight: '1000g', price: '' }
                           }
                         });
                         setIsAddingProduct(false);
@@ -414,7 +420,7 @@ const AdminDashboard = () => {
                         trial: { size: 'Trial Pack', weight: '50g', price: '' },
                         small: { size: '250g', weight: '250g', price: '' },
                         medium: { size: '500g', weight: '500g', price: '' },
-                        large: { size: '1 KG', weight: '1000g', price: '' }
+                        large: { size: '1kg', weight: '1000g', price: '' }
                       }
                     });
                   }}>
@@ -461,6 +467,15 @@ const AdminDashboard = () => {
                       onChange={(e) => setEditProduct(prev => ({ ...prev, brand: e.target.value }))}
                     />
                   </div>
+                  <div>
+                  <Label htmlFor="editImage">Product Image URL</Label>
+                  <Input 
+                    id="editImage" 
+                    placeholder="Enter image URL or path"
+                    value={editProduct.image}
+                    onChange={(e) => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
+                  />
+                </div>
                 </div>
 
                 {/* Edit Product Variants Pricing */}
@@ -516,7 +531,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="editLargePrice">1 KG Pack - Price (₹)</Label>
+                      <Label htmlFor="editLargePrice">1kg Pack - Price (₹)</Label>
                       <Input 
                         id="editLargePrice" 
                         type="number" 
@@ -532,16 +547,6 @@ const AdminDashboard = () => {
                       />
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="editImage">Product Image URL</Label>
-                  <Input 
-                    id="editImage" 
-                    placeholder="Enter image URL or path"
-                    value={editProduct.image}
-                    onChange={(e) => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
-                  />
                 </div>
                 <div>
                   <Label htmlFor="editDescription">Description</Label>
@@ -590,7 +595,7 @@ const AdminDashboard = () => {
                             trial: { size: 'Trial Pack', weight: '50g', price: '' },
                             small: { size: '250g', weight: '250g', price: '' },
                             medium: { size: '500g', weight: '500g', price: '' },
-                            large: { size: '1 KG', weight: '1000g', price: '' }
+                            large: { size: '1kg', weight: '1000g', price: '' }
                           }
                         });
                         alert('Product updated successfully!');
@@ -613,7 +618,7 @@ const AdminDashboard = () => {
                         trial: { size: 'Trial Pack', weight: '50g', price: '' },
                         small: { size: '250g', weight: '250g', price: '' },
                         medium: { size: '500g', weight: '500g', price: '' },
-                        large: { size: '1 KG', weight: '1000g', price: '' }
+                        large: { size: '1kg', weight: '1000g', price: '' }
                       }
                     });
                   }}>
@@ -685,7 +690,7 @@ const AdminDashboard = () => {
                                   trial: { size: 'Trial Pack', weight: '50g', price: '' },
                                   small: { size: '250g', weight: '250g', price: '' },
                                   medium: { size: '500g', weight: '500g', price: '' },
-                                  large: { size: '1 KG', weight: '1000g', price: '' }
+                                  large: { size: '1kg', weight: '1000g', price: '' }
                                 };
                                 
                                 // Fill in existing variant prices
