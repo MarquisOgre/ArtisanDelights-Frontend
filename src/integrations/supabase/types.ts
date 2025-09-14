@@ -14,7 +14,147 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      email_settings: {
+        Row: {
+          created_at: string
+          from_email: string
+          from_name: string
+          id: string
+          is_active: boolean
+          smtp_host: string
+          smtp_password: string
+          smtp_port: number
+          smtp_secure: boolean
+          smtp_username: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_email: string
+          from_name?: string
+          id?: string
+          is_active?: boolean
+          smtp_host: string
+          smtp_password: string
+          smtp_port?: number
+          smtp_secure?: boolean
+          smtp_username: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string
+          from_name?: string
+          id?: string
+          is_active?: boolean
+          smtp_host?: string
+          smtp_password?: string
+          smtp_port?: number
+          smtp_secure?: boolean
+          smtp_username?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          html_content: string
+          id: string
+          is_active: boolean
+          subject: string
+          template_name: string
+          text_content: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          html_content: string
+          id?: string
+          is_active?: boolean
+          subject: string
+          template_name: string
+          text_content?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          html_content?: string
+          id?: string
+          is_active?: boolean
+          subject?: string
+          template_name?: string
+          text_content?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          order_items: Json
+          order_notes: string | null
+          order_number: string
+          order_status: string
+          payment_method: string
+          payment_reference: string | null
+          payment_status: string
+          shipping_address: Json
+          shipping_cost: number
+          shipping_method: string | null
+          subtotal: number
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          order_items: Json
+          order_notes?: string | null
+          order_number?: string
+          order_status?: string
+          payment_method?: string
+          payment_reference?: string | null
+          payment_status?: string
+          shipping_address: Json
+          shipping_cost?: number
+          shipping_method?: string | null
+          subtotal: number
+          tax_amount?: number
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          order_items?: Json
+          order_notes?: string | null
+          order_number?: string
+          order_status?: string
+          payment_method?: string
+          payment_reference?: string | null
+          payment_status?: string
+          shipping_address?: Json
+          shipping_cost?: number
+          shipping_method?: string | null
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Input } from '@/components/ui/input';
@@ -90,10 +91,54 @@ const OrderForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Order submitted:', { formData, cartItems, total });
-    navigate('/order-success');
+    
+    try {
+      // Prepare order data
+      const orderData = {
+        customer_name: `${formData.firstName} ${formData.lastName}`,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        shipping_address: {
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country || 'India'
+        },
+        order_items: cartItems,
+        subtotal: subtotal,
+        shipping_cost: shipping,
+        tax_amount: tax,
+        total_amount: total,
+        payment_method: 'UPI',
+        payment_reference: formData.upiReference,
+        payment_status: 'paid',
+        order_status: 'processing',
+        shipping_method: selectedShipping,
+        order_notes: formData.notes
+      };
+
+      // Insert order into database
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([orderData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating order:', error);
+        alert('There was an error processing your order. Please try again.');
+        return;
+      }
+
+      console.log('Order created successfully:', data);
+      navigate('/order-success', { state: { order: data } });
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      alert('There was an error processing your order. Please try again.');
+    }
   };
 
   return (

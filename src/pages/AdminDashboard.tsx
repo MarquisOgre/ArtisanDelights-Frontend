@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/enhanced-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +19,9 @@ import {
   Trash2,
   Eye,
   BarChart3,
-  QrCode
+  QrCode,
+  Mail,
+  Settings
 } from 'lucide-react';
 import { products, getBasePrice } from '@/data/products';
 import PricingManagerTab from '@/components/PricingManagerTab';
@@ -27,6 +30,17 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [upiQrCode, setUpiQrCode] = useState('/upi-qr-placeholder.png');
+  const [orders, setOrders] = useState([]);
+  const [emailSettings, setEmailSettings] = useState({
+    smtp_host: '',
+    smtp_port: 587,
+    smtp_secure: true,
+    smtp_username: '',
+    smtp_password: '',
+    from_email: '',
+    from_name: 'Artisan Delights'
+  });
+  const [emailTemplates, setEmailTemplates] = useState([]);
   const [displayProducts, setDisplayProducts] = useState(() => {
     const saved = localStorage.getItem('adminProducts');
     return saved ? JSON.parse(saved) : products;
@@ -64,14 +78,92 @@ const AdminDashboard = () => {
     localStorage.setItem('adminProducts', JSON.stringify(displayProducts));
   }, [displayProducts]);
 
-  // Real analytics data (currently showing 0 for real data)
+  // Fetch orders, email settings, and templates
+  useEffect(() => {
+    fetchOrders();
+    fetchEmailSettings();
+    fetchEmailTemplates();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching orders:', error);
+      } else {
+        setOrders(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
+  const fetchEmailSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_settings')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching email settings:', error);
+      } else if (data) {
+        setEmailSettings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching email settings:', error);
+    }
+  };
+
+  const fetchEmailTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_templates')
+        .select('*')
+        .eq('is_active', true);
+      
+      if (error) {
+        console.error('Error fetching email templates:', error);
+      } else {
+        setEmailTemplates(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+    }
+  };
+
+  const saveEmailSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_settings')
+        .upsert([emailSettings])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error saving email settings:', error);
+        alert('Error saving email settings');
+      } else {
+        alert('Email settings saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving email settings:', error);
+    }
+  };
+
+  // Real analytics data from actual orders
   const analytics = {
-    totalRevenue: 0,
-    totalOrders: 0,
+    totalRevenue: orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0),
+    totalOrders: orders.length,
     totalProducts: products.length,
     totalUsers: 0,
     activeUsers: 0,
-    recentOrders: [], // No dummy orders
+    recentOrders: orders.slice(0, 5), // Show last 5 orders
   };
 
   const getStatusColor = (status: string) => {
@@ -98,12 +190,13 @@ const AdminDashboard = () => {
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 lg:w-[600px]">
+        <TabsList className="grid w-full grid-cols-7 lg:w-[700px]">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -179,14 +272,14 @@ const AdminDashboard = () => {
                   {analytics.recentOrders.map((order) => (
                     <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
-                        <p className="font-semibold">{order.id}</p>
-                        <p className="text-sm text-muted-foreground">{order.customer}</p>
+                        <p className="font-semibold">{order.order_number}</p>
+                        <p className="text-sm text-muted-foreground">{order.customer_name}</p>
                       </div>
                       <div className="text-right flex items-center gap-2">
                         <div>
-                          <p className="font-bold">₹{order.amount}</p>
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
+                          <p className="font-bold">₹{parseFloat(order.total_amount).toFixed(2)}</p>
+                          <Badge className={getStatusColor(order.order_status)}>
+                            {order.order_status}
                           </Badge>
                         </div>
                         <div className="flex gap-1">
@@ -774,7 +867,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {analytics.recentOrders.length === 0 ? (
+                     {orders.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="p-8 text-center">
                           <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -783,31 +876,31 @@ const AdminDashboard = () => {
                         </td>
                       </tr>
                     ) : (
-                      analytics.recentOrders.map((order, index) => (
+                      orders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-muted/20">
-                          <td className="p-4 font-mono text-sm">{order.id}</td>
+                          <td className="p-4 font-mono text-sm">{order.order_number}</td>
                           <td className="p-4">
                             <div>
-                              <p className="font-medium">{order.customer}</p>
-                              <p className="text-sm text-muted-foreground">customer{index + 1}@email.com</p>
+                              <p className="font-medium">{order.customer_name}</p>
+                              <p className="text-sm text-muted-foreground">{order.customer_email}</p>
                             </div>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 bg-muted rounded"></div>
-                              <span className="text-sm">Idly Podi + 2 more</span>
+                              <span className="text-sm">{order.order_items?.length || 0} items</span>
                             </div>
                           </td>
                           <td className="p-4">
-                            <span className="font-bold">₹{order.amount}</span>
+                            <span className="font-bold">₹{parseFloat(order.total_amount).toFixed(2)}</span>
                           </td>
                           <td className="p-4">
-                            <Badge className={getStatusColor(order.status)}>
-                              {order.status}
+                            <Badge className={getStatusColor(order.order_status)}>
+                              {order.order_status}
                             </Badge>
                           </td>
                           <td className="p-4 text-sm text-muted-foreground">
-                            {new Date().toLocaleDateString()}
+                            {new Date(order.created_at).toLocaleDateString()}
                           </td>
                           <td className="p-4">
                             <div className="flex gap-1">
@@ -815,7 +908,7 @@ const AdminDashboard = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 title="View Order"
-                                onClick={() => alert('View order functionality will be implemented')}
+                                onClick={() => alert(`Order Details:\nID: ${order.order_number}\nCustomer: ${order.customer_name}\nTotal: ₹${order.total_amount}\nStatus: ${order.order_status}`)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -831,7 +924,12 @@ const AdminDashboard = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 title="Delete Order"
-                                onClick={() => alert('Delete order functionality will be implemented')}
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to delete this order?')) {
+                                    // Delete functionality to be implemented
+                                    alert('Delete order functionality will be implemented');
+                                  }
+                                }}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -1067,6 +1165,122 @@ const AdminDashboard = () => {
         {/* Pricing Tab */}
         <TabsContent value="pricing">
           <PricingManagerTab products={displayProducts} />
+        </TabsContent>
+
+        {/* Email Settings Tab */}
+        <TabsContent value="email" className="space-y-6">
+          <h2 className="text-2xl font-bold">Email Configuration</h2>
+          
+          {/* SMTP Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                SMTP Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="smtpHost">SMTP Host</Label>
+                  <Input
+                    id="smtpHost"
+                    placeholder="smtp.gmail.com"
+                    value={emailSettings.smtp_host}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_host: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="smtpPort">SMTP Port</Label>
+                  <Input
+                    id="smtpPort"
+                    type="number"
+                    placeholder="587"
+                    value={emailSettings.smtp_port}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_port: parseInt(e.target.value) || 587 }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="smtpUsername">SMTP Username</Label>
+                  <Input
+                    id="smtpUsername"
+                    placeholder="your-email@gmail.com"
+                    value={emailSettings.smtp_username}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_username: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="smtpPassword">SMTP Password</Label>
+                  <Input
+                    id="smtpPassword"
+                    type="password"
+                    placeholder="Your app password"
+                    value={emailSettings.smtp_password}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_password: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fromEmail">From Email</Label>
+                  <Input
+                    id="fromEmail"
+                    placeholder="orders@artisandelights.com"
+                    value={emailSettings.from_email}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, from_email: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fromName">From Name</Label>
+                  <Input
+                    id="fromName"
+                    placeholder="Artisan Delights"
+                    value={emailSettings.from_name}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, from_name: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <Button onClick={saveEmailSettings} variant="artisan">
+                Save SMTP Settings
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Email Templates */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Email Templates
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {emailTemplates.length === 0 ? (
+                <div className="text-center py-8">
+                  <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No email templates found</p>
+                  <p className="text-sm text-muted-foreground">Default templates will be loaded automatically</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {emailTemplates.map((template) => (
+                    <div key={template.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold capitalize">{template.template_name.replace('_', ' ')}</h4>
+                          <p className="text-sm text-muted-foreground">{template.subject}</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Edit Template
+                        </Button>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        <p>Variables: {`{{customer_name}}, {{order_number}}, {{total_amount}}, {{order_items}}`}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Settings Tab */}
