@@ -307,7 +307,11 @@ const OrderForm = () => {
                     ) : (
                       cartItems.map((item) => (
                         <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                          <div className="w-16 h-16 bg-muted rounded"></div>
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-sm leading-tight">{item.name}</h4>
                             <p className="text-xs text-muted-foreground">{item.size}</p>
