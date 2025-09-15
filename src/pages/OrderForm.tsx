@@ -134,6 +134,21 @@ const OrderForm = () => {
       }
 
       console.log('Order created successfully:', data);
+
+      // Send confirmation email
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
+          body: { order: data }
+        });
+
+        if (emailError) {
+          console.error('Error sending confirmation email:', emailError);
+          // Don't block the flow if email fails
+        }
+      } catch (emailError) {
+        console.error('Error calling email function:', emailError);
+        // Don't block the flow if email fails
+      }
       navigate('/order-success', { state: { order: data } });
     } catch (error) {
       console.error('Error submitting order:', error);
