@@ -2,3 +2,12 @@ project_id = "ajtdmenflndkxhvvuwak"
 
 [functions.send-order-confirmation]
 verify_jwt = false
+
+[functions.send-order-shipped]
+verify_jwt = false
+
+[functions.send-order-delivered]
+verify_jwt = false
+
+[functions.send-test-email]
+verify_jwt = false

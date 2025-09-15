@@ -41,6 +41,8 @@ const AdminDashboard = () => {
     from_name: 'Artisan Delights'
   });
   const [emailTemplates, setEmailTemplates] = useState([]);
+  const [testEmail, setTestEmail] = useState('');
+  const [testEmailType, setTestEmailType] = useState('confirmation');
   const [displayProducts, setDisplayProducts] = useState(() => {
     const saved = localStorage.getItem('adminProducts');
     return saved ? JSON.parse(saved) : products;
@@ -153,6 +155,32 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error saving email settings:', error);
+    }
+  };
+
+  const sendTestEmail = async () => {
+    if (!testEmail) {
+      alert('Please enter an email address for testing');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-test-email', {
+        body: { 
+          email: testEmail,
+          template_type: testEmailType
+        }
+      });
+
+      if (error) {
+        console.error('Error sending test email:', error);
+        alert('Error sending test email: ' + error.message);
+      } else {
+        alert(`Test ${testEmailType} email sent successfully to ${testEmail}!`);
+      }
+    } catch (error) {
+      console.error('Error calling test email function:', error);
+      alert('Error sending test email');
     }
   };
 
@@ -1238,9 +1266,49 @@ const AdminDashboard = () => {
                   />
                 </div>
               </div>
-              <Button onClick={saveEmailSettings} variant="artisan">
-                Save SMTP Settings
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={saveEmailSettings} variant="artisan">
+                  Save SMTP Settings
+                </Button>
+              </div>
+              
+              {/* Test Email Section */}
+              <div className="border-t pt-6 mt-6">
+                <h4 className="text-lg font-semibold mb-4">Test Email</h4>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="testEmail">Test Email Address</Label>
+                    <Input
+                      id="testEmail"
+                      type="email"
+                      placeholder="test@example.com"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="testEmailType">Email Template</Label>
+                    <Select value={testEmailType} onValueChange={setTestEmailType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="confirmation">Order Confirmation</SelectItem>
+                        <SelectItem value="shipped">Order Shipped</SelectItem>
+                        <SelectItem value="delivered">Order Delivered</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-end">
+                    <Button onClick={sendTestEmail} variant="outline" className="w-full">
+                      Send Test Email
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Send a test email to verify your SMTP configuration and email templates
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -1268,9 +1336,27 @@ const AdminDashboard = () => {
                           <h4 className="font-semibold capitalize">{template.template_name.replace('_', ' ')}</h4>
                           <p className="text-sm text-muted-foreground">{template.subject}</p>
                         </div>
-                        <Button variant="outline" size="sm">
-                          Edit Template
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            Edit Template
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              const templateType = template.template_name === 'order_confirmation' ? 'confirmation' : 
+                                                 template.template_name === 'order_shipped' ? 'shipped' : 'delivered';
+                              setTestEmailType(templateType);
+                              if (testEmail) {
+                                sendTestEmail();
+                              } else {
+                                alert('Please enter a test email address first');
+                              }
+                            }}
+                          >
+                            Test Send
+                          </Button>
+                        </div>
                       </div>
                       <div className="text-xs text-muted-foreground mt-2">
                         <p>Variables: {`{{customer_name}}, {{order_number}}, {{total_amount}}, {{order_items}}`}</p>
