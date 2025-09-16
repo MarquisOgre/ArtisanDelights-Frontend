@@ -29,7 +29,7 @@ import PricingManagerTab from '@/components/PricingManagerTab';
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
-  const [upiQrCode, setUpiQrCode] = useState('/upi-qr-placeholder.png');
+  const [upiQrCode, setUpiQrCode] = useState('/UPI-QRcode.png');
   const [orders, setOrders] = useState([]);
   const [emailSettings, setEmailSettings] = useState({
     smtp_host: '',

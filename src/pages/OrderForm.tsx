@@ -17,7 +17,7 @@ import {
   QrCode
 } from 'lucide-react';
 import Footer from '@/components/Footer';
-import upiQrImage from '@/assets/upi-qr-placeholder.png';
+import upiQrImage from '@/assets/UPI-QRcode.png';
 
 const OrderForm = () => {
   const navigate = useNavigate();
