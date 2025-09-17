@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Footer from '@/components/Footer';
 import { 
   Package, 
@@ -184,6 +185,101 @@ const AdminDashboard = () => {
     }
   };
 
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .update({ order_status: newStatus })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating order status:', error);
+        alert('Error updating order status');
+        return;
+      }
+
+      // Send email based on status
+      if (newStatus === 'shipped') {
+        await supabase.functions.invoke('send-order-shipped', {
+          body: {
+            orderId: data.id,
+            orderNumber: data.order_number,
+            customerName: data.customer_name,
+            customerEmail: data.customer_email,
+            shippingAddress: data.shipping_address,
+            orderItems: data.order_items,
+            totalAmount: data.total_amount,
+            trackingNumber: 'TRK' + Date.now()
+          }
+        });
+      } else if (newStatus === 'delivered') {
+        await supabase.functions.invoke('send-order-delivered', {
+          body: {
+            orderId: data.id,
+            orderNumber: data.order_number,
+            customerName: data.customer_name,
+            customerEmail: data.customer_email,
+            shippingAddress: data.shipping_address,
+            orderItems: data.order_items,
+            totalAmount: data.total_amount,
+            deliveryDate: new Date().toISOString()
+          }
+        });
+      }
+
+      // Refresh orders
+      fetchOrders();
+      alert(`Order status updated to ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating order:', error);
+      alert('Error updating order');
+    }
+  };
+
+  const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: paymentStatus })
+        .eq('id', orderId);
+
+      if (error) {
+        console.error('Error updating payment status:', error);
+        alert('Error updating payment status');
+        return;
+      }
+
+      fetchOrders();
+      alert(`Payment status updated to ${paymentStatus}`);
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      alert('Error updating payment');
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) {
+        console.error('Error deleting order:', error);
+        alert('Error deleting order');
+        return;
+      }
+
+      fetchOrders();
+      alert('Order deleted successfully');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('Error deleting order');
+    }
+  };
+
   // Real analytics data from actual orders
   const analytics = {
     totalRevenue: orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0),
@@ -310,17 +406,57 @@ const AdminDashboard = () => {
                             {order.order_status}
                           </Badge>
                         </div>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" title="View Order">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" title="Edit Order">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" title="Delete Order">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                         <div className="flex gap-1">
+                           <Button 
+                             variant="ghost" 
+                             size="sm" 
+                             title="View Order"
+                             onClick={() => alert(`Order Details:\nID: ${order.order_number}\nCustomer: ${order.customer_name}\nTotal: ₹${order.total_amount}\nStatus: ${order.order_status}\nPayment: ${order.payment_status}`)}
+                           >
+                             <Eye className="h-4 w-4" />
+                           </Button>
+                           <DropdownMenu>
+                             <DropdownMenuTrigger asChild>
+                               <Button variant="ghost" size="sm" title="Update Status">
+                                 <Edit className="h-4 w-4" />
+                               </Button>
+                             </DropdownMenuTrigger>
+                             <DropdownMenuContent>
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'processing')}>
+                                 Mark as Processing
+                               </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'shipped')}>
+                                 Mark as Shipped
+                               </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'delivered')}>
+                                 Mark as Delivered
+                               </DropdownMenuItem>
+                               <DropdownMenuSeparator />
+                               <DropdownMenuItem onClick={() => updatePaymentStatus(order.id, 'paid')}>
+                                 Mark Payment as Paid
+                               </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => updatePaymentStatus(order.id, 'failed')}>
+                                 Mark Payment as Failed
+                               </DropdownMenuItem>
+                               <DropdownMenuSeparator />
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'cancelled')}>
+                                 Cancel Order
+                               </DropdownMenuItem>
+                             </DropdownMenuContent>
+                           </DropdownMenu>
+                           <Button 
+                             variant="ghost" 
+                             size="sm" 
+                             title="Delete Order"
+                             onClick={() => {
+                               if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+                                 deleteOrder(order.id);
+                               }
+                             }}
+                           >
+                             <Trash2 className="h-4 w-4" />
+                           </Button>
+                         </div>
                       </div>
                     </div>
                   ))}
@@ -885,13 +1021,14 @@ const AdminDashboard = () => {
                 <table className="w-full">
                   <thead className="border-b bg-muted/50">
                     <tr>
-                      <th className="text-left p-4">Order ID</th>
-                      <th className="text-left p-4">Customer</th>
-                      <th className="text-left p-4">Products</th>
-                      <th className="text-left p-4">Amount</th>
-                      <th className="text-left p-4">Status</th>
-                      <th className="text-left p-4">Date</th>
-                      <th className="text-left p-4">Actions</th>
+                       <th className="text-left p-4">Order ID</th>
+                       <th className="text-left p-4">Customer</th>
+                       <th className="text-left p-4">Products</th>
+                       <th className="text-left p-4">Amount</th>
+                       <th className="text-left p-4">Order Status</th>
+                       <th className="text-left p-4">Payment Status</th>
+                       <th className="text-left p-4">Date</th>
+                       <th className="text-left p-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -919,50 +1056,75 @@ const AdminDashboard = () => {
                               <span className="text-sm">{order.order_items?.length || 0} items</span>
                             </div>
                           </td>
-                          <td className="p-4">
-                            <span className="font-bold">₹{parseFloat(order.total_amount).toFixed(2)}</span>
-                          </td>
-                          <td className="p-4">
-                            <Badge className={getStatusColor(order.order_status)}>
-                              {order.order_status}
-                            </Badge>
-                          </td>
-                          <td className="p-4 text-sm text-muted-foreground">
-                            {new Date(order.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="p-4">
-                            <div className="flex gap-1">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                title="View Order"
-                                onClick={() => alert(`Order Details:\nID: ${order.order_number}\nCustomer: ${order.customer_name}\nTotal: ₹${order.total_amount}\nStatus: ${order.order_status}`)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                title="Edit Order"
-                                onClick={() => alert('Edit order functionality will be implemented')}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                title="Delete Order"
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this order?')) {
-                                    // Delete functionality to be implemented
-                                    alert('Delete order functionality will be implemented');
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </td>
+                           <td className="p-4">
+                             <span className="font-bold">₹{parseFloat(order.total_amount).toFixed(2)}</span>
+                           </td>
+                           <td className="p-4">
+                             <Badge className={getStatusColor(order.order_status)}>
+                               {order.order_status}
+                             </Badge>
+                           </td>
+                           <td className="p-4">
+                             <Badge variant={order.payment_status === 'paid' ? 'default' : order.payment_status === 'pending' ? 'secondary' : 'destructive'}>
+                               {order.payment_status}
+                             </Badge>
+                           </td>
+                           <td className="p-4 text-sm text-muted-foreground">
+                             {new Date(order.created_at).toLocaleDateString()}
+                           </td>
+                           <td className="p-4">
+                             <div className="flex gap-1">
+                               <Button 
+                                 variant="ghost" 
+                                 size="sm" 
+                                 title="View Order"
+                                 onClick={() => alert(`Order Details:\nID: ${order.order_number}\nCustomer: ${order.customer_name}\nTotal: ₹${order.total_amount}\nStatus: ${order.order_status}\nPayment: ${order.payment_status}`)}
+                               >
+                                 <Eye className="h-4 w-4" />
+                               </Button>
+                               <DropdownMenu>
+                                 <DropdownMenuTrigger asChild>
+                                   <Button variant="ghost" size="sm" title="Update Status">
+                                     <Edit className="h-4 w-4" />
+                                   </Button>
+                                 </DropdownMenuTrigger>
+                                 <DropdownMenuContent>
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'processing')}>
+                                 Mark as Processing
+                               </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'shipped')}>
+                                 Mark as Shipped
+                               </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'delivered')}>
+                                 Mark as Delivered
+                               </DropdownMenuItem>
+                               <DropdownMenuSeparator />
+                               <DropdownMenuItem onClick={() => updatePaymentStatus(order.id, 'paid')}>
+                                 Mark Payment as Paid
+                               </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => updatePaymentStatus(order.id, 'failed')}>
+                                 Mark Payment as Failed
+                               </DropdownMenuItem>
+                               <DropdownMenuSeparator />
+                               <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'cancelled')}>
+                                 Cancel Order
+                               </DropdownMenuItem>
+                                 </DropdownMenuContent>
+                               </DropdownMenu>
+                               <Button 
+                                 variant="ghost" 
+                                 size="sm" 
+                                 title="Delete Order"
+                                 onClick={() => {
+                                   if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+                                     deleteOrder(order.id);
+                                   }
+                                 }}
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </td>
                         </tr>
                       ))
                     )}
