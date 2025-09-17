@@ -22,10 +22,12 @@ import {
   BarChart3,
   QrCode,
   Mail,
-  Settings
+  Settings,
+  Upload
 } from 'lucide-react';
-import { products, getBasePrice } from '@/data/products';
+import { products as defaultProducts, getBasePrice } from '@/data/products';
 import PricingManagerTab from '@/components/PricingManagerTab';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -44,10 +46,7 @@ const AdminDashboard = () => {
   const [emailTemplates, setEmailTemplates] = useState([]);
   const [testEmail, setTestEmail] = useState('');
   const [testEmailType, setTestEmailType] = useState('confirmation');
-  const [displayProducts, setDisplayProducts] = useState(() => {
-    const saved = localStorage.getItem('adminProducts');
-    return saved ? JSON.parse(saved) : products;
-  });
+  const [displayProducts, setDisplayProducts] = useState([]);
   const [newProduct, setNewProduct] = useState({
     name: '',
     category: '',
@@ -76,17 +75,54 @@ const AdminDashboard = () => {
     }
   });
 
-  // Save products to localStorage whenever displayProducts changes
-  useEffect(() => {
-    localStorage.setItem('adminProducts', JSON.stringify(displayProducts));
-  }, [displayProducts]);
+  const { toast } = useToast();
 
-  // Fetch orders, email settings, and templates
+  // Fetch orders, email settings, templates, and products
   useEffect(() => {
     fetchOrders();
     fetchEmailSettings();
     fetchEmailTemplates();
+    fetchProducts();
+    fetchUpiSettings();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching products:', error);
+        // Fallback to default products if database fails
+        setDisplayProducts(defaultProducts);
+      } else {
+        setDisplayProducts(data || []);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setDisplayProducts(defaultProducts);
+    }
+  };
+
+  const fetchUpiSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('upi_settings')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (error) {
+        console.error('Error fetching UPI settings:', error);
+      } else if (data && data.length > 0) {
+        setUpiQrCode(data[0].qr_code_url);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -284,7 +320,7 @@ const AdminDashboard = () => {
   const analytics = {
     totalRevenue: orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0),
     totalOrders: orders.length,
-    totalProducts: products.length,
+    totalProducts: displayProducts.length,
     totalUsers: 0,
     activeUsers: 0,
     recentOrders: orders.slice(0, 5), // Show last 5 orders
@@ -301,6 +337,22 @@ const AdminDashboard = () => {
       default:
         return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const getProductImage = (productName) => {
+    // Map product names to images
+    const productImageMap = {
+      'Idly Podi': '/src/assets/podi-collection.jpg',
+      'Palli Podi (Peanut Powder)': '/src/assets/peanut-podi.jpg',
+      'Sambar Powder': '/src/assets/coriander-podi.jpg',
+      'Rasam Powder': '/src/assets/sesame-podi.jpg',
+      'Curry Leaves Podi': '/src/assets/curry-leaf-podi.jpg',
+      'Gunpowder Idly Podi': '/src/assets/gunpowder-podi.jpg',
+      'Coconut Chutney Podi': '/src/assets/drumstick-podi.jpg',
+      'Bisi Bele Bath Powder': '/src/assets/garlic-podi.jpg'
+    };
+    
+    return productImageMap[productName] || '/src/assets/podi-collection.jpg';
   };
 
   return (
@@ -1052,7 +1104,15 @@ const AdminDashboard = () => {
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-muted rounded"></div>
+                              {order.order_items && order.order_items.length > 0 ? (
+                                <img 
+                                  src={getProductImage(order.order_items[0].name)} 
+                                  alt={order.order_items[0].name}
+                                  className="w-8 h-8 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-muted rounded"></div>
+                              )}
                               <span className="text-sm">{order.order_items?.length || 0} items</span>
                             </div>
                           </td>
@@ -1354,7 +1414,7 @@ const AdminDashboard = () => {
 
         {/* Pricing Tab */}
         <TabsContent value="pricing">
-          <PricingManagerTab products={displayProducts} />
+            <PricingManagerTab products={displayProducts} />
         </TabsContent>
 
         {/* Email Settings Tab */}

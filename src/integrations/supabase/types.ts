@@ -155,6 +155,87 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          benefits: Json | null
+          brand: string
+          category: string
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          image: string | null
+          in_stock: boolean
+          ingredients: Json | null
+          name: string
+          slug: string
+          updated_at: string
+          variants: Json
+        }
+        Insert: {
+          benefits?: Json | null
+          brand?: string
+          category: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image?: string | null
+          in_stock?: boolean
+          ingredients?: Json | null
+          name: string
+          slug: string
+          updated_at?: string
+          variants?: Json
+        }
+        Update: {
+          benefits?: Json | null
+          brand?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image?: string | null
+          in_stock?: boolean
+          ingredients?: Json | null
+          name?: string
+          slug?: string
+          updated_at?: string
+          variants?: Json
+        }
+        Relationships: []
+      }
+      upi_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          merchant_name: string | null
+          qr_code_url: string
+          updated_at: string
+          upi_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          merchant_name?: string | null
+          qr_code_url: string
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          merchant_name?: string | null
+          qr_code_url?: string
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
