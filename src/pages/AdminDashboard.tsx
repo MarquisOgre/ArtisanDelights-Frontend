@@ -97,12 +97,42 @@ const AdminDashboard = () => {
         console.error('Error fetching products:', error);
         // Fallback to default products if database fails
         setDisplayProducts(defaultProducts);
+        toast({
+          title: "Warning",
+          description: "Using default products. Database connection failed.",
+          variant: "destructive"
+        });
+      } else if (data && data.length > 0) {
+        // Convert database products to match the expected format
+        const formattedProducts = data.map(product => ({
+          ...product,
+          id: product.id,
+          inStock: product.in_stock,
+          variants: Array.isArray(product.variants) ? product.variants : []
+        }));
+        setDisplayProducts(formattedProducts);
+        toast({
+          title: "Success",
+          description: `Loaded ${data.length} products from database`,
+          variant: "default"
+        });
       } else {
-        setDisplayProducts(data || []);
+        // No products in database, use defaults
+        setDisplayProducts(defaultProducts);
+        toast({
+          title: "Info",
+          description: "No products found in database. Using default products.",
+          variant: "default"
+        });
       }
     } catch (err) {
       console.error('Error:', err);
       setDisplayProducts(defaultProducts);
+      toast({
+        title: "Error",
+        description: "Failed to fetch products. Using default products.",
+        variant: "destructive"
+      });
     }
   };
 
