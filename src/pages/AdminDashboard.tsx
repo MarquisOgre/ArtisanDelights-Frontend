@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Footer from '@/components/Footer';
 import { 
   Package, 
@@ -74,6 +75,10 @@ const AdminDashboard = () => {
       large: { size: '1kg', weight: '1000g', price: '' }
     }
   });
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
+  const [isViewProductOpen, setIsViewProductOpen] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState(null);
 
   const { toast } = useToast();
 
@@ -370,19 +375,116 @@ const AdminDashboard = () => {
   };
 
   const getProductImage = (productName) => {
-    // Map product names to images
+    // Map product names to images - use proper paths without /src
     const productImageMap = {
-      'Idly Podi': '/src/assets/podi-collection.jpg',
-      'Palli Podi (Peanut Powder)': '/src/assets/peanut-podi.jpg',
-      'Sambar Powder': '/src/assets/coriander-podi.jpg',
-      'Rasam Powder': '/src/assets/sesame-podi.jpg',
-      'Curry Leaves Podi': '/src/assets/curry-leaf-podi.jpg',
-      'Gunpowder Idly Podi': '/src/assets/gunpowder-podi.jpg',
-      'Coconut Chutney Podi': '/src/assets/drumstick-podi.jpg',
-      'Bisi Bele Bath Powder': '/src/assets/garlic-podi.jpg'
+      'Idly Podi': '/podi-collection.jpg',
+      'Palli Podi (Peanut Powder)': '/peanut-podi.jpg',
+      'Sambar Powder': '/coriander-podi.jpg',
+      'Rasam Powder': '/sesame-podi.jpg',
+      'Curry Leaves Podi': '/curry-leaf-podi.jpg',
+      'Gunpowder Idly Podi': '/gunpowder-podi.jpg',
+      'Coconut Chutney Podi': '/drumstick-podi.jpg',
+      'Bisi Bele Bath Powder': '/garlic-podi.jpg'
     };
     
-    return productImageMap[productName] || '/src/assets/podi-collection.jpg';
+    return productImageMap[productName] || '/podi-collection.jpg';
+  };
+
+  const getPriceRange = (product) => {
+    if (!product.variants || product.variants.length === 0) return '₹0';
+    const prices = product.variants.map(v => v.price).sort((a, b) => a - b);
+    const min = prices[0];
+    const max = prices[prices.length - 1];
+    return min === max ? `₹${min}` : `₹${min} - ₹${max}`;
+  };
+
+  const saveProductToDatabase = async (productData) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert([{
+          name: productData.name,
+          slug: productData.name.toLowerCase().replace(/\s+/g, '-'),
+          category: productData.category,
+          description: productData.description,
+          image: productData.image || getProductImage(productData.name),
+          brand: productData.brand || 'ARTISAN DELIGHTS',
+          in_stock: true,
+          featured: false,
+          variants: productData.variants
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving product:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save product to database",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      toast({
+        title: "Success",
+        description: "Product saved to database successfully",
+        variant: "default"
+      });
+      return data;
+    } catch (err) {
+      console.error('Database save error:', err);
+      toast({
+        title: "Error",
+        description: "Database connection failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const updateProductInDatabase = async (productId, productData) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .update({
+          name: productData.name,
+          slug: productData.name.toLowerCase().replace(/\s+/g, '-'),
+          category: productData.category,
+          description: productData.description,
+          image: productData.image,
+          brand: productData.brand || 'ARTISAN DELIGHTS',
+          variants: productData.variants
+        })
+        .eq('id', productId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating product:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update product in database",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      toast({
+        title: "Success",
+        description: "Product updated in database successfully",
+        variant: "default"
+      });
+      return data;
+    } catch (err) {
+      console.error('Database update error:', err);
+      toast({
+        title: "Error",
+        description: "Database connection failed",
+        variant: "destructive"
+      });
+      return false;
+    }
   };
 
   return (
@@ -552,14 +654,234 @@ const AdminDashboard = () => {
         <TabsContent value="products" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Product Management</h2>
-            <Button 
-              variant="artisan" 
-              onClick={() => setIsAddingProduct(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Product
-            </Button>
+            <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="artisan" 
+                  onClick={() => setIsAddingProduct(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Product
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Product</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="productName">Product Name</Label>
+                      <Input 
+                        id="productName" 
+                        placeholder="Enter product name"
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, name: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={newProduct.category} onValueChange={(value) => setNewProduct(prev => ({ ...prev, category: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="traditional-podis">Traditional Podis</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input 
+                        id="brand" 
+                        placeholder="Brand name" 
+                        value={newProduct.brand}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, brand: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="image">Product Image URL</Label>
+                      <Input 
+                        id="image" 
+                        placeholder="Enter image URL or path"
+                        value={newProduct.image}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, image: e.target.value }))}
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Add image URL or use default: /podi-collection.jpg
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Product Variants Pricing */}
+                  <div>
+                    <Label className="text-lg font-semibold">Product Variants & Pricing</Label>
+                    <div className="grid md:grid-cols-2 gap-4 mt-2">
+                      <div>
+                        <Label htmlFor="trialPrice">Trial Pack (50g) - Price (₹)</Label>
+                        <Input 
+                          id="trialPrice" 
+                          type="number" 
+                          placeholder="50"
+                          value={newProduct.variants.trial.price}
+                          onChange={(e) => setNewProduct(prev => ({ 
+                            ...prev, 
+                            variants: { 
+                              ...prev.variants, 
+                              trial: { ...prev.variants.trial, price: e.target.value } 
+                            } 
+                          }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="smallPrice">250g Pack - Price (₹)</Label>
+                        <Input 
+                          id="smallPrice" 
+                          type="number" 
+                          placeholder="150"
+                          value={newProduct.variants.small.price}
+                          onChange={(e) => setNewProduct(prev => ({ 
+                            ...prev, 
+                            variants: { 
+                              ...prev.variants, 
+                              small: { ...prev.variants.small, price: e.target.value } 
+                            } 
+                          }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="mediumPrice">500g Pack - Price (₹)</Label>
+                        <Input 
+                          id="mediumPrice" 
+                          type="number" 
+                          placeholder="280"
+                          value={newProduct.variants.medium.price}
+                          onChange={(e) => setNewProduct(prev => ({ 
+                            ...prev, 
+                            variants: { 
+                              ...prev.variants, 
+                              medium: { ...prev.variants.medium, price: e.target.value } 
+                            } 
+                          }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="largePrice">1 KG Pack - Price (₹)</Label>
+                        <Input 
+                          id="largePrice" 
+                          type="number" 
+                          placeholder="520"
+                          value={newProduct.variants.large.price}
+                          onChange={(e) => setNewProduct(prev => ({ 
+                            ...prev, 
+                            variants: { 
+                              ...prev.variants, 
+                              large: { ...prev.variants.large, price: e.target.value } 
+                            } 
+                          }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description" 
+                      placeholder="Product description"
+                      value={newProduct.description}
+                      onChange={(e) => setNewProduct(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" onClick={() => {
+                      setIsAddingProduct(false);
+                      setIsAddProductOpen(false);
+                      setNewProduct({ 
+                        name: '', 
+                        category: '', 
+                        brand: 'ARTISAN DELIGHTS', 
+                        description: '', 
+                        image: '',
+                        variants: {
+                          trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                          small: { size: '250g', weight: '250g', price: '' },
+                          medium: { size: '500g', weight: '500g', price: '' },
+                          large: { size: '1kg', weight: '1000g', price: '' }
+                        }
+                      });
+                    }}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      variant="artisan"
+                      onClick={async () => {
+                        const hasValidVariants = Object.values(newProduct.variants).some(variant => variant.price && parseInt(variant.price) > 0);
+                        
+                        if (newProduct.name && newProduct.category && newProduct.description && hasValidVariants) {
+                          const productVariants = Object.entries(newProduct.variants)
+                            .filter(([key, variant]) => variant.price && parseInt(variant.price) > 0)
+                            .map(([key, variant]) => ({
+                              id: variant.weight,
+                              size: variant.size,
+                              weight: variant.weight,
+                              price: parseInt(variant.price)
+                            }));
+
+                          const productToAdd = {
+                            name: newProduct.name,
+                            slug: newProduct.name.toLowerCase().replace(/\s+/g, '-'),
+                            category: newProduct.category,
+                            description: newProduct.description,
+                            image: newProduct.image || getProductImage(newProduct.name),
+                            brand: newProduct.brand,
+                            variants: productVariants
+                          };
+
+                          // Save to database first
+                          const savedProduct = await saveProductToDatabase(productToAdd);
+                          if (savedProduct) {
+                            // Add to local state with database ID
+                            const productWithId = {
+                              ...productToAdd,
+                              id: savedProduct.id,
+                              inStock: true,
+                              featured: false
+                            };
+                            setDisplayProducts(prev => [...prev, productWithId]);
+                            
+                            // Reset form
+                            setNewProduct({ 
+                              name: '', 
+                              category: '', 
+                              brand: 'ARTISAN DELIGHTS', 
+                              description: '', 
+                              image: '',
+                              variants: {
+                                trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                                small: { size: '250g', weight: '250g', price: '' },
+                                medium: { size: '500g', weight: '500g', price: '' },
+                                large: { size: '1kg', weight: '1000g', price: '' }
+                              }
+                            });
+                            setIsAddingProduct(false);
+                            setIsAddProductOpen(false);
+                          }
+                        } else {
+                          toast({
+                            title: "Validation Error",
+                            description: "Please fill in product name, category, description, and at least one variant price",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                    >
+                      Save Product
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {isAddingProduct && (
@@ -700,7 +1022,7 @@ const AdminDashboard = () => {
                 <div className="flex gap-2">
                   <Button 
                     variant="artisan"
-                    onClick={() => {
+                    onClick={async () => {
                       const hasValidVariants = Object.values(newProduct.variants).some(variant => variant.price && parseInt(variant.price) > 0);
                       
                       if (newProduct.name && newProduct.category && newProduct.description && hasValidVariants) {
@@ -714,34 +1036,50 @@ const AdminDashboard = () => {
                           }));
 
                         const productToAdd = {
-                          id: `new-${Date.now()}`,
                           name: newProduct.name,
                           slug: newProduct.name.toLowerCase().replace(/\s+/g, '-'),
                           category: newProduct.category,
                           description: newProduct.description,
-                          image: newProduct.image || '/podi-collection.jpg',
-                          inStock: true,
-                          featured: false,
+                          image: newProduct.image || getProductImage(newProduct.name),
+                          brand: newProduct.brand,
                           variants: productVariants
                         };
-                        setDisplayProducts(prev => [...prev, productToAdd]);
-                        setNewProduct({ 
-                          name: '', 
-                          category: '', 
-                          brand: 'ARTISAN DELIGHTS', 
-                          description: '', 
-                          image: '',
-                          variants: {
-                            trial: { size: 'Trial Pack', weight: '50g', price: '' },
-                            small: { size: '250g', weight: '250g', price: '' },
-                            medium: { size: '500g', weight: '500g', price: '' },
-                            large: { size: '1kg', weight: '1000g', price: '' }
-                          }
-                        });
-                        setIsAddingProduct(false);
-                        alert('Product added successfully with all variants!');
+
+                        // Save to database first
+                        const savedProduct = await saveProductToDatabase(productToAdd);
+                        if (savedProduct) {
+                          // Add to local state with database ID
+                          const productWithId = {
+                            ...productToAdd,
+                            id: savedProduct.id,
+                            inStock: true,
+                            featured: false
+                          };
+                          setDisplayProducts(prev => [...prev, productWithId]);
+                          
+                          // Reset form
+                          setNewProduct({ 
+                            name: '', 
+                            category: '', 
+                            brand: 'ARTISAN DELIGHTS', 
+                            description: '', 
+                            image: '',
+                            variants: {
+                              trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                              small: { size: '250g', weight: '250g', price: '' },
+                              medium: { size: '500g', weight: '500g', price: '' },
+                              large: { size: '1kg', weight: '1000g', price: '' }
+                            }
+                          });
+                          setIsAddingProduct(false);
+                          setIsAddProductOpen(false);
+                        }
                       } else {
-                        alert('Please fill in product name, category, description, and at least one variant price');
+                        toast({
+                          title: "Validation Error",
+                          description: "Please fill in product name, category, description, and at least one variant price",
+                          variant: "destructive"
+                        });
                       }
                     }}
                   >
@@ -749,6 +1087,7 @@ const AdminDashboard = () => {
                   </Button>
                   <Button variant="outline" onClick={() => {
                     setIsAddingProduct(false);
+                    setIsAddProductOpen(false);
                     setNewProduct({ 
                       name: '', 
                       category: '', 
@@ -899,7 +1238,7 @@ const AdminDashboard = () => {
                 <div className="flex gap-2">
                   <Button 
                     variant="artisan"
-                    onClick={() => {
+                    onClick={async () => {
                       const hasValidVariants = Object.values(editProduct.variants).some(variant => variant.price && parseInt(variant.price) > 0);
                       
                       if (editProduct.name && editProduct.category && editProduct.description && hasValidVariants) {
@@ -912,34 +1251,48 @@ const AdminDashboard = () => {
                             price: parseInt(variant.price)
                           }));
 
-                        setDisplayProducts(prev => prev.map(product => 
-                          product.id === editingProduct.id 
-                            ? {
-                                ...product,
-                                name: editProduct.name,
-                                description: editProduct.description,
-                                image: editProduct.image || product.image,
-                                variants: updatedVariants
-                              }
-                            : product
-                        ));
-                        setEditingProduct(null);
-                        setEditProduct({ 
-                          name: '', 
-                          category: '', 
-                          brand: '', 
-                          description: '', 
-                          image: '',
-                          variants: {
-                            trial: { size: 'Trial Pack', weight: '50g', price: '' },
-                            small: { size: '250g', weight: '250g', price: '' },
-                            medium: { size: '500g', weight: '500g', price: '' },
-                            large: { size: '1kg', weight: '1000g', price: '' }
-                          }
-                        });
-                        alert('Product updated successfully!');
+                        const updatedProduct = {
+                          name: editProduct.name,
+                          category: editProduct.category,
+                          description: editProduct.description,
+                          image: editProduct.image || editingProduct.image,
+                          brand: editProduct.brand,
+                          variants: updatedVariants
+                        };
+
+                        // Update in database first
+                        const saved = await updateProductInDatabase(editingProduct.id, updatedProduct);
+                        if (saved) {
+                          // Update local state
+                          setDisplayProducts(prev => prev.map(product => 
+                            product.id === editingProduct.id 
+                              ? { ...product, ...updatedProduct }
+                              : product
+                          ));
+                          
+                          // Reset form
+                          setEditingProduct(null);
+                          setIsEditProductOpen(false);
+                          setEditProduct({ 
+                            name: '', 
+                            category: '', 
+                            brand: '', 
+                            description: '', 
+                            image: '',
+                            variants: {
+                              trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                              small: { size: '250g', weight: '250g', price: '' },
+                              medium: { size: '500g', weight: '500g', price: '' },
+                              large: { size: '1kg', weight: '1000g', price: '' }
+                            }
+                          });
+                        }
                       } else {
-                        alert('Please fill in product name, category, description, and at least one variant price');
+                        toast({
+                          title: "Validation Error",
+                          description: "Please fill in product name, category, description, and at least one variant price",
+                          variant: "destructive"
+                        });
                       }
                     }}
                   >
@@ -947,6 +1300,7 @@ const AdminDashboard = () => {
                   </Button>
                   <Button variant="outline" onClick={() => {
                     setEditingProduct(null);
+                    setIsEditProductOpen(false);
                     setEditProduct({ 
                       name: '', 
                       category: '', 
@@ -1003,7 +1357,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4">{product.category}</td>
                         <td className="p-4">ARTISAN DELIGHTS</td>
-                        <td className="p-4">₹{getBasePrice(product)}</td>
+                        <td className="p-4">{getPriceRange(product)}</td>
                         <td className="p-4">
                           <Badge variant={product.inStock ? "default" : "destructive"}>
                             {product.inStock ? "In Stock" : "Out of Stock"}
@@ -1011,48 +1365,297 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4">
                           <div className="flex gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => window.location.href = `/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
-                              title="View Product"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => {
-                                setEditingProduct(product);
-                                // Convert existing variants back to the edit format
-                                const editVariants = {
-                                  trial: { size: 'Trial Pack', weight: '50g', price: '' },
-                                  small: { size: '250g', weight: '250g', price: '' },
-                                  medium: { size: '500g', weight: '500g', price: '' },
-                                  large: { size: '1kg', weight: '1000g', price: '' }
-                                };
-                                
-                                // Fill in existing variant prices
-                                product.variants.forEach(variant => {
-                                  if (variant.weight === '50g') editVariants.trial.price = variant.price.toString();
-                                  if (variant.weight === '250g') editVariants.small.price = variant.price.toString();
-                                  if (variant.weight === '500g') editVariants.medium.price = variant.price.toString();
-                                  if (variant.weight === '1000g') editVariants.large.price = variant.price.toString();
-                                });
+                            <Dialog open={isViewProductOpen} onOpenChange={setIsViewProductOpen}>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setViewingProduct(product)}
+                                  title="View Product"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Product Details</DialogTitle>
+                                </DialogHeader>
+                                {viewingProduct && (
+                                  <div className="space-y-4">
+                                    <img 
+                                      src={viewingProduct.image} 
+                                      alt={viewingProduct.name}
+                                      className="w-32 h-32 object-cover rounded mx-auto"
+                                    />
+                                    <div>
+                                      <h3 className="text-xl font-semibold">{viewingProduct.name}</h3>
+                                      <p className="text-muted-foreground">{viewingProduct.category}</p>
+                                      <p className="mt-2">{viewingProduct.description}</p>
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold mb-2">Available Variants:</h4>
+                                      <div className="space-y-2">
+                                        {viewingProduct.variants?.map((variant, idx) => (
+                                          <div key={idx} className="flex justify-between p-2 border rounded">
+                                            <span>{variant.size} ({variant.weight})</span>
+                                            <span className="font-medium">₹{variant.price}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
 
-                                setEditProduct({
-                                  name: product.name,
-                                  category: product.category,
-                                  brand: 'ARTISAN DELIGHTS',
-                                  description: product.description,
-                                  image: product.image,
-                                  variants: editVariants
-                                });
-                              }}
-                              title="Edit Product"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <Dialog open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    // Convert existing variants back to the edit format
+                                    const editVariants = {
+                                      trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                                      small: { size: '250g', weight: '250g', price: '' },
+                                      medium: { size: '500g', weight: '500g', price: '' },
+                                      large: { size: '1kg', weight: '1000g', price: '' }
+                                    };
+                                    
+                                    // Fill in existing variant prices
+                                    product.variants?.forEach(variant => {
+                                      if (variant.weight === '50g') editVariants.trial.price = variant.price.toString();
+                                      if (variant.weight === '250g') editVariants.small.price = variant.price.toString();
+                                      if (variant.weight === '500g') editVariants.medium.price = variant.price.toString();
+                                      if (variant.weight === '1000g') editVariants.large.price = variant.price.toString();
+                                    });
+
+                                    setEditProduct({
+                                      name: product.name,
+                                      category: product.category,
+                                      brand: product.brand || 'ARTISAN DELIGHTS',
+                                      description: product.description,
+                                      image: product.image,
+                                      variants: editVariants
+                                    });
+                                  }}
+                                  title="Edit Product"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Product</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                      <Label htmlFor="editProductName">Product Name</Label>
+                                      <Input 
+                                        id="editProductName" 
+                                        placeholder="Enter product name"
+                                        value={editProduct.name}
+                                        onChange={(e) => setEditProduct(prev => ({ ...prev, name: e.target.value }))}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="editCategory">Category</Label>
+                                      <Select value={editProduct.category} onValueChange={(value) => setEditProduct(prev => ({ ...prev, category: value }))}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="traditional-podis">Traditional Podis</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="editBrand">Brand</Label>
+                                      <Input 
+                                        id="editBrand" 
+                                        placeholder="Brand name" 
+                                        value={editProduct.brand}
+                                        onChange={(e) => setEditProduct(prev => ({ ...prev, brand: e.target.value }))}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="editImage">Product Image URL</Label>
+                                      <Input 
+                                        id="editImage" 
+                                        placeholder="Enter image URL or path"
+                                        value={editProduct.image}
+                                        onChange={(e) => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Edit Product Variants Pricing */}
+                                  <div>
+                                    <Label className="text-lg font-semibold">Product Variants & Pricing</Label>
+                                    <div className="grid md:grid-cols-2 gap-4 mt-2">
+                                      <div>
+                                        <Label htmlFor="editTrialPrice">Trial Pack (50g) - Price (₹)</Label>
+                                        <Input 
+                                          id="editTrialPrice" 
+                                          type="number" 
+                                          placeholder="50"
+                                          value={editProduct.variants.trial.price}
+                                          onChange={(e) => setEditProduct(prev => ({ 
+                                            ...prev, 
+                                            variants: { 
+                                              ...prev.variants, 
+                                              trial: { ...prev.variants.trial, price: e.target.value } 
+                                            } 
+                                          }))}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label htmlFor="editSmallPrice">250g Pack - Price (₹)</Label>
+                                        <Input 
+                                          id="editSmallPrice" 
+                                          type="number" 
+                                          placeholder="150"
+                                          value={editProduct.variants.small.price}
+                                          onChange={(e) => setEditProduct(prev => ({ 
+                                            ...prev, 
+                                            variants: { 
+                                              ...prev.variants, 
+                                              small: { ...prev.variants.small, price: e.target.value } 
+                                            } 
+                                          }))}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label htmlFor="editMediumPrice">500g Pack - Price (₹)</Label>
+                                        <Input 
+                                          id="editMediumPrice" 
+                                          type="number" 
+                                          placeholder="280"
+                                          value={editProduct.variants.medium.price}
+                                          onChange={(e) => setEditProduct(prev => ({ 
+                                            ...prev, 
+                                            variants: { 
+                                              ...prev.variants, 
+                                              medium: { ...prev.variants.medium, price: e.target.value } 
+                                            } 
+                                          }))}
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label htmlFor="editLargePrice">1kg Pack - Price (₹)</Label>
+                                        <Input 
+                                          id="editLargePrice" 
+                                          type="number" 
+                                          placeholder="520"
+                                          value={editProduct.variants.large.price}
+                                          onChange={(e) => setEditProduct(prev => ({ 
+                                            ...prev, 
+                                            variants: { 
+                                              ...prev.variants, 
+                                              large: { ...prev.variants.large, price: e.target.value } 
+                                            } 
+                                          }))}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="editDescription">Description</Label>
+                                    <Textarea 
+                                      id="editDescription" 
+                                      placeholder="Product description"
+                                      value={editProduct.description}
+                                      onChange={(e) => setEditProduct(prev => ({ ...prev, description: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div className="flex gap-2 justify-end">
+                                    <Button variant="outline" onClick={() => {
+                                      setEditingProduct(null);
+                                      setIsEditProductOpen(false);
+                                      setEditProduct({ 
+                                        name: '', 
+                                        category: '', 
+                                        brand: '', 
+                                        description: '', 
+                                        image: '',
+                                        variants: {
+                                          trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                                          small: { size: '250g', weight: '250g', price: '' },
+                                          medium: { size: '500g', weight: '500g', price: '' },
+                                          large: { size: '1kg', weight: '1000g', price: '' }
+                                        }
+                                      });
+                                    }}>
+                                      Cancel
+                                    </Button>
+                                    <Button 
+                                      variant="artisan"
+                                      onClick={async () => {
+                                        const hasValidVariants = Object.values(editProduct.variants).some(variant => variant.price && parseInt(variant.price) > 0);
+                                        
+                                        if (editProduct.name && editProduct.category && editProduct.description && hasValidVariants) {
+                                          const updatedVariants = Object.entries(editProduct.variants)
+                                            .filter(([key, variant]) => variant.price && parseInt(variant.price) > 0)
+                                            .map(([key, variant]) => ({
+                                              id: variant.weight,
+                                              size: variant.size,
+                                              weight: variant.weight,
+                                              price: parseInt(variant.price)
+                                            }));
+
+                                          const updatedProduct = {
+                                            name: editProduct.name,
+                                            category: editProduct.category,
+                                            description: editProduct.description,
+                                            image: editProduct.image || editingProduct.image,
+                                            brand: editProduct.brand,
+                                            variants: updatedVariants
+                                          };
+
+                                          // Update in database first
+                                          const saved = await updateProductInDatabase(editingProduct.id, updatedProduct);
+                                          if (saved) {
+                                            // Update local state
+                                            setDisplayProducts(prev => prev.map(product => 
+                                              product.id === editingProduct.id 
+                                                ? { ...product, ...updatedProduct }
+                                                : product
+                                            ));
+                                            
+                                            // Reset form
+                                            setEditingProduct(null);
+                                            setIsEditProductOpen(false);
+                                            setEditProduct({ 
+                                              name: '', 
+                                              category: '', 
+                                              brand: '', 
+                                              description: '', 
+                                              image: '',
+                                              variants: {
+                                                trial: { size: 'Trial Pack', weight: '50g', price: '' },
+                                                small: { size: '250g', weight: '250g', price: '' },
+                                                medium: { size: '500g', weight: '500g', price: '' },
+                                                large: { size: '1kg', weight: '1000g', price: '' }
+                                              }
+                                            });
+                                          }
+                                        } else {
+                                          toast({
+                                            title: "Validation Error",
+                                            description: "Please fill in product name, category, description, and at least one variant price",
+                                            variant: "destructive"
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      Update Product
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                             <Button 
                               variant="ghost" 
                               size="sm"
