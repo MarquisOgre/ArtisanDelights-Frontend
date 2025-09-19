@@ -352,12 +352,43 @@ const AdminDashboard = () => {
   };
 
   // Real analytics data from actual orders
+  // Calculate user statistics from orders
+  const getUserStats = () => {
+    const userMap = new Map();
+    
+    orders.forEach(order => {
+      const email = order.customer_email;
+      if (!userMap.has(email)) {
+        userMap.set(email, {
+          name: order.customer_name,
+          email: email,
+          orderCount: 0,
+          totalSpent: 0,
+          lastOrderDate: order.created_at
+        });
+      }
+      
+      const user = userMap.get(email);
+      user.orderCount++;
+      user.totalSpent += parseFloat(order.total_amount || 0);
+      
+      // Update last order date if this order is more recent
+      if (new Date(order.created_at) > new Date(user.lastOrderDate)) {
+        user.lastOrderDate = order.created_at;
+      }
+    });
+    
+    return Array.from(userMap.values());
+  };
+
+  const userStats = getUserStats();
+
   const analytics = {
     totalRevenue: orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0),
     totalOrders: orders.length,
     totalProducts: displayProducts.length,
-    totalUsers: 2, // Admin and regular user
-    activeUsers: 2,
+    totalUsers: userStats.length + 2, // Include admin and regular user
+    activeUsers: userStats.length + 2,
     recentOrders: orders.slice(0, 5), // Show last 5 orders
   };
 
@@ -1926,6 +1957,7 @@ const AdminDashboard = () => {
                      </tr>
                    </thead>
                    <tbody>
+                      {/* System Users */}
                       <tr>
                         <td className="p-4">
                           <div className="flex items-center gap-3">
@@ -1986,6 +2018,65 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                       </tr>
+                      
+                      {/* Real Customer Data from Orders */}
+                      {userStats.map((user, index) => (
+                        <tr key={user.email}>
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center">
+                                <span className="text-sm font-medium text-sage">
+                                  {user.name?.charAt(0)?.toUpperCase() || 'C'}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-medium">{user.name || 'Unknown Customer'}</p>
+                                <p className="text-sm text-muted-foreground">Customer</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">{user.email}</td>
+                          <td className="p-4 font-semibold text-terracotta">{user.orderCount}</td>
+                          <td className="p-4 font-semibold text-sage">₹{user.totalSpent.toFixed(2)}</td>
+                          <td className="p-4">
+                            <Badge className="bg-sage text-primary-foreground">Active</Badge>
+                          </td>
+                          <td className="p-4">
+                            {new Date(user.lastOrderDate).toLocaleDateString()}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                title="View User Orders"
+                                onClick={() => {
+                                  const userOrders = orders.filter(order => order.customer_email === user.email);
+                                  const orderDetails = userOrders.map(order => 
+                                    `Order #${order.order_number} - ₹${order.total_amount} - ${order.order_status}`
+                                  ).join('\n');
+                                  alert(`User Orders:\n\n${orderDetails}`);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" title="Contact User">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {userStats.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center">
+                            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                            <p className="text-muted-foreground">No customer orders found</p>
+                            <p className="text-sm text-muted-foreground">Real customer data will appear here when orders are placed</p>
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                 </table>
               </div>
