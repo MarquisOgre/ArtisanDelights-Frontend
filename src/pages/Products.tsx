@@ -3,11 +3,13 @@ import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/enhanced-button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { products, categories, getProductsByCategory, getBasePrice, type Product } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
+import { categories, type Product } from '@/data/products';
 import { Search, Filter } from 'lucide-react';
 import Footer from '@/components/Footer';
 
 const Products = () => {
+  const { products, loading, getProductsByCategory, getBasePrice } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -36,7 +38,7 @@ const Products = () => {
     });
 
     return filtered;
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [selectedCategory, searchQuery, sortBy, getProductsByCategory, getBasePrice]);
 
   const handleAddToCart = (product: Product) => {
     console.log('Added to cart:', product);
@@ -110,7 +112,11 @@ const Products = () => {
         </div>
 
         {/* Products Grid */}
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <p className="text-xl text-muted-foreground mb-4">Loading products...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-xl text-muted-foreground mb-4">No products found</p>
             <p className="text-muted-foreground mb-6">

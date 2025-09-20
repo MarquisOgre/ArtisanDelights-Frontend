@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/enhanced-button';
 import ProductCard from '@/components/ProductCard';
-import { getFeaturedProducts } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { ArrowRight, Award, Heart, Truck, Leaf, ShoppingCart, Star } from 'lucide-react';
 import heroImage from '@/assets/podi-collection.jpg';
 import Footer from '@/components/Footer';
 
 const Home = () => {
+  const { getFeaturedProducts, loading } = useProducts();
   const featuredProducts = getFeaturedProducts();
 
   return (
@@ -130,9 +131,15 @@ const Home = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-lg text-muted-foreground">Loading products...</p>
+              </div>
+            ) : (
+              featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            )}
           </div>
           
           <div className="text-center">
