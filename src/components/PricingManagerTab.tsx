@@ -17,6 +17,8 @@ const PricingManagerTab = ({ products = defaultProducts }: PricingManagerTabProp
   const [editingVariant, setEditingVariant] = useState<string | null>(null);
   const [tempPrices, setTempPrices] = useState<{ [key: string]: number }>({});
   const [updatedPrices, setUpdatedPrices] = useState<{ [key: string]: number }>({});
+  const [bulkDiscount, setBulkDiscount] = useState<number>(0);
+  const [priceIncrease, setPriceIncrease] = useState<number>(0);
   const { toast } = useToast();
 
   const handleEditPrice = (variantId: string, currentPrice: number) => {
@@ -52,6 +54,96 @@ const PricingManagerTab = ({ products = defaultProducts }: PricingManagerTabProp
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
   };
 
+  const handleBulkDiscount = () => {
+    if (!bulkDiscount || bulkDiscount <= 0 || bulkDiscount >= 100) {
+      toast({
+        title: "Invalid Discount",
+        description: "Please enter a valid discount percentage (1-99%)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newPrices = { ...updatedPrices };
+    products.forEach(product => {
+      product.variants.forEach((variant: any) => {
+        const currentPrice = updatedPrices[variant.id] || variant.price;
+        const discountedPrice = Math.round(currentPrice * (1 - bulkDiscount / 100));
+        newPrices[variant.id] = discountedPrice;
+      });
+    });
+
+    setUpdatedPrices(newPrices);
+    toast({
+      title: "Bulk Discount Applied",
+      description: `${bulkDiscount}% discount applied to all products`,
+    });
+    setBulkDiscount(0);
+  };
+
+  const handlePriceIncrease = () => {
+    if (!priceIncrease || priceIncrease <= 0) {
+      toast({
+        title: "Invalid Increase",
+        description: "Please enter a valid price increase percentage",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newPrices = { ...updatedPrices };
+    products.forEach(product => {
+      product.variants.forEach((variant: any) => {
+        const currentPrice = updatedPrices[variant.id] || variant.price;
+        const increasedPrice = Math.round(currentPrice * (1 + priceIncrease / 100));
+        newPrices[variant.id] = increasedPrice;
+      });
+    });
+
+    setUpdatedPrices(newPrices);
+    toast({
+      title: "Price Increase Applied",
+      description: `${priceIncrease}% price increase applied to all products`,
+    });
+    setPriceIncrease(0);
+  };
+
+  const handleRemoveDiscounts = () => {
+    const newPrices = { ...updatedPrices };
+    products.forEach(product => {
+      product.variants.forEach((variant: any) => {
+        if (variant.originalPrice) {
+          newPrices[variant.id] = variant.originalPrice;
+        }
+      });
+    });
+
+    setUpdatedPrices(newPrices);
+    toast({
+      title: "Discounts Removed",
+      description: "All discounts have been removed and prices restored to original",
+    });
+  };
+
+  const handleFestivalPricing = () => {
+    const festivalDiscount = 15; // 15% festival discount
+    const newPrices = { ...updatedPrices };
+    
+    products.forEach(product => {
+      product.variants.forEach((variant: any) => {
+        const basePrice = variant.originalPrice || variant.price;
+        const festivalPrice = Math.round(basePrice * (1 - festivalDiscount / 100));
+        newPrices[variant.id] = festivalPrice;
+      });
+    });
+
+    setUpdatedPrices(newPrices);
+    toast({
+      title: "Festival Pricing Applied",
+      description: `${festivalDiscount}% festival discount applied to all products`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -69,7 +161,7 @@ const PricingManagerTab = ({ products = defaultProducts }: PricingManagerTabProp
           </Select>
           <Button 
             variant="artisan"
-            onClick={() => alert('Bulk discount functionality will be implemented')}
+            onClick={handleBulkDiscount}
           >
             Apply Bulk Discount
           </Button>
@@ -158,7 +250,14 @@ const PricingManagerTab = ({ products = defaultProducts }: PricingManagerTabProp
                     <tr key={product.id} className="border-b hover:bg-muted/20">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <img src={product.image} alt={product.name} className="w-10 h-10 rounded object-cover" />
+                          <img 
+                            src={product.image || '/podi-collection.jpg'} 
+                            alt={product.name} 
+                            className="w-10 h-10 rounded object-cover" 
+                            onError={(e) => {
+                              e.currentTarget.src = '/podi-collection.jpg';
+                            }}
+                          />
                           <div>
                             <span className="font-medium">{product.name}</span>
                             <p className="text-sm text-muted-foreground">{product.category}</p>
@@ -348,44 +447,54 @@ const PricingManagerTab = ({ products = defaultProducts }: PricingManagerTabProp
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="space-y-4">
-              <Label>Apply Discount to All</Label>
-              <div className="flex gap-2">
-                <Input placeholder="Discount %" type="number" />
-                <Button 
-                  variant="outline"
-                  onClick={() => alert('Bulk discount functionality will be implemented')}
-                >
-                  Apply
-                </Button>
+              <div className="space-y-4">
+                <Label>Apply Discount to All</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Discount %" 
+                    type="number" 
+                    value={bulkDiscount || ''}
+                    onChange={(e) => setBulkDiscount(Number(e.target.value))}
+                  />
+                  <Button 
+                    variant="outline"
+                    onClick={handleBulkDiscount}
+                  >
+                    Apply
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div className="space-y-4">
-              <Label>Price Increase</Label>
-              <div className="flex gap-2">
-                <Input placeholder="Increase %" type="number" />
-                <Button 
-                  variant="outline"
-                  onClick={() => alert('Price increase functionality will be implemented')}
-                >
-                  Apply
-                </Button>
+              <div className="space-y-4">
+                <Label>Price Increase</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Increase %" 
+                    type="number"
+                    value={priceIncrease || ''}
+                    onChange={(e) => setPriceIncrease(Number(e.target.value))}
+                  />
+                  <Button 
+                    variant="outline"
+                    onClick={handlePriceIncrease}
+                  >
+                    Apply
+                  </Button>
+                </div>
               </div>
-            </div>
             <div className="space-y-4">
               <Label>Quick Actions</Label>
               <div className="flex gap-2">
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => alert('Remove discounts functionality will be implemented')}
+                  onClick={handleRemoveDiscounts}
                 >
                   Remove All Discounts
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => alert('Festival pricing functionality will be implemented')}
+                  onClick={handleFestivalPricing}
                 >
                   Festival Pricing
                 </Button>

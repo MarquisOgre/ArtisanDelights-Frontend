@@ -406,10 +406,10 @@ const AdminDashboard = () => {
   };
 
   const getProductImage = (productName) => {
-    // Map product names to images - use proper paths without /src
+    // Map product names to images - use proper paths
     const productImageMap = {
       'Idly Podi': '/podi-collection.jpg',
-      'Palli Podi (Peanut Powder)': '/peanut-podi.jpg',
+      'Palli Podi (Peanut Powder)': '/peanut-podi.jpg', 
       'Sambar Powder': '/coriander-podi.jpg',
       'Rasam Powder': '/sesame-podi.jpg',
       'Curry Leaves Podi': '/curry-leaf-podi.jpg',
@@ -1373,10 +1373,13 @@ const AdminDashboard = () => {
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <img 
-                              src={product.image} 
+                              src={product.image || getProductImage(product.name)} 
                               alt={product.name}
                               className="w-12 h-12 rounded object-cover cursor-pointer"
                               onClick={() => window.location.href = `/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
+                              onError={(e) => {
+                                e.currentTarget.src = '/podi-collection.jpg';
+                              }}
                             />
                             <span 
                               className="font-medium cursor-pointer hover:text-terracotta"

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Badge } from '@/components/ui/badge';
-import { Product, getBasePrice } from '@/data/products';
+import { Product, getBasePrice, getPriceRange } from '@/data/products';
 import { ShoppingCart, Star } from 'lucide-react';
 
 interface ProductCardProps {
@@ -10,7 +10,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const basePrice = getBasePrice(product);
+  const priceRange = getPriceRange(product);
   const hasDiscount = product.variants.some(v => v.originalPrice && v.originalPrice > v.price);
 
   return (
@@ -78,12 +78,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           )}
           
-          <div className="flex justify-between items-center pt-2 border-t border-warm-brown/10">
+          <div className="flex flex-col gap-3 pt-2 border-t border-warm-brown/10">
             <div>
-              <span className="text-sm text-muted-foreground">Starting from</span>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-terracotta">
-                  ₹{basePrice}
+                  {priceRange}
                 </span>
                 {hasDiscount && (
                   <span className="text-sm text-muted-foreground line-through">
@@ -92,12 +91,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 )}
               </div>
             </div>
-            <Link to={`/product/${product.slug}`}>
+            <Link to={`/product/${product.slug}`} className="w-full">
               <Button
                 variant="artisan"
                 size="sm"
                 disabled={!product.inStock}
-                className="flex items-center gap-2 bg-terracotta hover:bg-warm-brown"
+                className="w-full flex items-center justify-center gap-2 bg-terracotta hover:bg-warm-brown"
               >
                 <ShoppingCart className="h-4 w-4" />
                 View Details

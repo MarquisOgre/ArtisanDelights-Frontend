@@ -184,6 +184,15 @@ export const getBasePrice = (product: Product) => {
   return Math.min(...product.variants.map(v => v.price));
 };
 
+// Get price range for a product (min - max)
+export const getPriceRange = (product: Product) => {
+  if (!product.variants || product.variants.length === 0) return '₹0';
+  const prices = product.variants.map(v => v.price).sort((a, b) => a - b);
+  const min = prices[0];
+  const max = prices[prices.length - 1];
+  return min === max ? `₹${min}` : `₹${min} - ₹${max}`;
+};
+
 // Get variant by ID
 export const getVariantById = (productId: string, variantId: string) => {
   const product = products.find(p => p.id === productId);
