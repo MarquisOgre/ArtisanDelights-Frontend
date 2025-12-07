@@ -135,35 +135,35 @@ const OrderForm = () => {
 
       console.log('Submitting order:', JSON.stringify(orderData, null, 2));
 
-      // Insert order into database
-      const { data, error } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single();
+      // Use fetch directly to avoid potential SDK serialization issues
+      const response = await fetch('https://ajtdmenflndkxhvvuwak.supabase.co/rest/v1/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdGRtZW5mbG5ka3hodnZ1d2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1NDU4NDksImV4cCI6MjA3MzEyMTg0OX0.yzsAPbd3XRA5V_DOQ8_Lo0uoVk9_3PCap-bZr1XDlqc',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdGRtZW5mbG5ka3hodnZ1d2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1NDU4NDksImV4cCI6MjA3MzEyMTg0OX0.yzsAPbd3XRA5V_DOQ8_Lo0uoVk9_3PCap-bZr1XDlqc',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(orderData)
+      });
 
-      if (error) {
-        console.error('Error creating order:', error);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error creating order:', errorData);
         alert('There was an error processing your order. Please try again.');
         return;
       }
 
+      const responseData = await response.json();
+      // API returns array, get first item
+      const data = Array.isArray(responseData) ? responseData[0] : responseData;
       console.log('Order created successfully:', data);
 
-      // Send confirmation email
-      try {
-        const { error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
-          body: { order: data }
-        });
+      // Send confirmation email (non-blocking)
+      supabase.functions.invoke('send-order-confirmation', {
+        body: { order: data }
+      }).catch(err => console.error('Email error:', err));
 
-        if (emailError) {
-          console.error('Error sending confirmation email:', emailError);
-          // Don't block the flow if email fails
-        }
-      } catch (emailError) {
-        console.error('Error calling email function:', emailError);
-        // Don't block the flow if email fails
-      }
       navigate('/order-success', { state: { order: data } });
     } catch (error) {
       console.error('Error submitting order:', error);
