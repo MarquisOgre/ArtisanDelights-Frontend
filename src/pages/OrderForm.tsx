@@ -95,35 +95,50 @@ const OrderForm = () => {
     e.preventDefault();
     
     try {
+      // Prepare clean order items (remove undefined/null values)
+      const cleanOrderItems = cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size,
+        image: item.image || ''
+      }));
+
+      // Prepare clean shipping address
+      const cleanShippingAddress = {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        country: formData.country || 'India'
+      };
+
       // Prepare order data
       const orderData = {
-        customer_name: `${formData.firstName} ${formData.lastName}`,
+        customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
         customer_email: formData.email,
-        customer_phone: formData.phone,
-        shipping_address: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country || 'India'
-        },
-        order_items: cartItems,
-        subtotal: subtotal,
-        shipping_cost: shipping,
-        tax_amount: tax,
-        total_amount: total,
+        customer_phone: formData.phone || null,
+        shipping_address: cleanShippingAddress,
+        order_items: cleanOrderItems,
+        subtotal: Number(subtotal.toFixed(2)),
+        shipping_cost: Number(shipping.toFixed(2)),
+        tax_amount: Number(tax.toFixed(2)),
+        total_amount: Number(total.toFixed(2)),
         payment_method: 'UPI',
-        payment_reference: formData.upiReference,
+        payment_reference: formData.upiReference || null,
         payment_status: 'paid',
         order_status: 'processing',
         shipping_method: selectedShipping,
-        order_notes: formData.notes
+        order_notes: formData.notes || null
       };
+
+      console.log('Submitting order:', JSON.stringify(orderData, null, 2));
 
       // Insert order into database
       const { data, error } = await supabase
         .from('orders')
-        .insert([orderData])
+        .insert(orderData)
         .select()
         .single();
 
