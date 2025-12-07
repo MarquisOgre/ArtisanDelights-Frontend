@@ -1,0 +1,15 @@
+-- Insert 7 more podi products
+INSERT INTO products (name, slug, category, description, image, in_stock, featured, ingredients, benefits, variants) VALUES
+('Flax Seed Podi', 'flax-seed-podi', 'Podi', 'Nutrient-rich flax seed powder with a mild nutty flavor, perfect for health-conscious families.', '/podi-collection.jpg', true, false, '["Flax Seeds", "Red Chilies", "Cumin", "Salt"]', '["Rich in Omega-3", "High Fiber", "Heart Healthy", "Aids Digestion"]', '[{"size": "100g", "price": 120, "originalPrice": 140}, {"size": "250g", "price": 280, "originalPrice": 320}]'),
+
+('Curry Powder', 'curry-powder', 'Powder', 'Aromatic blend of traditional spices for authentic South Indian curries.', '/curry-leaf-podi.jpg', true, true, '["Coriander", "Cumin", "Turmeric", "Red Chilies", "Fenugreek", "Black Pepper"]', '["Enhances Flavor", "Anti-inflammatory", "Digestive Aid", "Rich in Antioxidants"]', '[{"size": "100g", "price": 90, "originalPrice": 110}, {"size": "250g", "price": 200, "originalPrice": 250}, {"size": "500g", "price": 380, "originalPrice": 450}]'),
+
+('Garlic Podi', 'garlic-podi', 'Podi', 'Pungent and flavorful garlic powder mixed with traditional spices.', '/garlic-podi.jpg', true, false, '["Garlic", "Red Chilies", "Urad Dal", "Salt"]', '["Immune Boosting", "Heart Healthy", "Antibacterial", "Adds Bold Flavor"]', '[{"size": "100g", "price": 100, "originalPrice": 120}, {"size": "250g", "price": 230, "originalPrice": 270}]'),
+
+('Drumstick Leaves Podi', 'drumstick-leaves-podi', 'Podi', 'Nutritious moringa leaves powder packed with vitamins and minerals.', '/drumstick-podi.jpg', true, true, '["Drumstick Leaves", "Red Chilies", "Urad Dal", "Tamarind", "Salt"]', '["Superfood", "High in Iron", "Boosts Energy", "Rich in Vitamins"]', '[{"size": "100g", "price": 130, "originalPrice": 160}, {"size": "250g", "price": 300, "originalPrice": 360}]'),
+
+('Nalla Karam Podi', 'nalla-karam-podi', 'Podi', 'Classic Andhra-style spicy red chili powder for authentic taste.', '/gunpowder-podi.jpg', true, false, '["Red Chilies", "Garlic", "Cumin", "Salt"]', '["Authentic Andhra Taste", "Metabolism Booster", "Rich Flavor", "Versatile Use"]', '[{"size": "100g", "price": 85, "originalPrice": 100}, {"size": "250g", "price": 190, "originalPrice": 230}]'),
+
+('Gongura Podi', 'gongura-podi', 'Podi', 'Tangy and spicy gongura leaves powder, an Andhra specialty.', '/coriander-podi.jpg', true, true, '["Gongura Leaves", "Red Chilies", "Garlic", "Cumin", "Salt"]', '["Rich in Iron", "Tangy Flavor", "Traditional Recipe", "Aids Digestion"]', '[{"size": "100g", "price": 140, "originalPrice": 170}, {"size": "250g", "price": 320, "originalPrice": 380}]'),
+
+('Putnala Podi', 'putnala-podi', 'Podi', 'Roasted Bengal gram powder with spices, perfect for rice and snacks.', '/peanut-podi.jpg', true, false, '["Roasted Chana Dal", "Red Chilies", "Cumin", "Curry Leaves", "Salt"]', '["High Protein", "Great for Kids", "Crunchy Texture", "Nutritious"]', '[{"size": "100g", "price": 95, "originalPrice": 115}, {"size": "250g", "price": 220, "originalPrice": 260}]');
