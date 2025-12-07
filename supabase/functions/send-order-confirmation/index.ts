@@ -9,18 +9,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+  size: string;
+}
+
 interface OrderConfirmationRequest {
   order: {
     order_number: string;
     customer_name: string;
     customer_email: string;
     total_amount: number;
-    order_items: Array<{
-      name: string;
-      quantity: number;
-      price: number;
-      size: string;
-    }>;
+    order_items: OrderItem[] | string;
   };
 }
 
@@ -32,9 +34,19 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { order }: OrderConfirmationRequest = await req.json();
+    
+    console.log("Received order data:", JSON.stringify(order, null, 2));
+
+    // Parse order_items if it's a string (from database JSON)
+    let orderItems: OrderItem[] = [];
+    if (typeof order.order_items === 'string') {
+      orderItems = JSON.parse(order.order_items);
+    } else if (Array.isArray(order.order_items)) {
+      orderItems = order.order_items;
+    }
 
     // Generate order items HTML
-    const orderItemsHtml = order.order_items.map(item => 
+    const orderItemsHtml = orderItems.map(item => 
       `<tr>
         <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name} (${item.size})</td>
         <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
