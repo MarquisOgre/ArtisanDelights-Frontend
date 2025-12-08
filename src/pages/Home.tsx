@@ -31,14 +31,8 @@ const Home = () => {
                   </p>
                 </div>
                 <div className="flex flex-col md:flex-row gap-4">
-                  <Link to="/order-form">
-                    <Button size="xl" className="text-lg px-8 py-6 bg-white text-terracotta hover:bg-orange-50 shadow-xl hover:shadow-2xl transition-all duration-300">
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Order Now
-                    </Button>
-                  </Link>
                   <Link to="/products">
-                    <Button variant="outline" size="xl" className="text-lg px-8 py-6 text-white border-white bg-terracotta/80 hover:bg-terracotta hover:text-white shadow-lg backdrop-blur-sm font-semibold">
+                    <Button size="xl" className="text-lg px-8 py-6 bg-white text-terracotta hover:bg-orange-50 shadow-xl hover:shadow-2xl transition-all duration-300">
                       Explore Products
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>

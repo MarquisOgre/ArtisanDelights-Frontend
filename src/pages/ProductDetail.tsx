@@ -202,16 +202,28 @@ const ProductDetail = () => {
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="artisan"
-                    size="lg"
-                    disabled={!product.inStock}
-                    onClick={handleOrderNow}
-                    className="flex items-center gap-2 bg-terracotta hover:bg-warm-brown"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                    Order Now
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      disabled={!product.inStock}
+                      onClick={handleOrderNow}
+                      className="flex items-center gap-2 border-terracotta text-terracotta hover:bg-terracotta/10"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      Add to Cart
+                    </Button>
+                    <Button
+                      variant="artisan"
+                      size="lg"
+                      disabled={!product.inStock}
+                      onClick={handleOrderNow}
+                      className="flex items-center gap-2 bg-terracotta hover:bg-warm-brown"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      Order Now
+                    </Button>
+                  </div>
                 </div>
                 {!product.inStock && (
                   <p className="text-muted-foreground text-sm">
