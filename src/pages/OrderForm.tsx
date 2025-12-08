@@ -95,7 +95,7 @@ const OrderForm = () => {
     e.preventDefault();
     
     try {
-      // Prepare shipping address as plain object (Supabase SDK handles JSONB automatically)
+      // Prepare shipping address
       const shippingAddress = {
         address: formData.address,
         city: formData.city,
@@ -104,7 +104,7 @@ const OrderForm = () => {
         country: formData.country || 'India'
       };
 
-      // Prepare order items as plain array (Supabase SDK handles JSONB automatically)
+      // Prepare order items
       const orderItems = cartItems.map(item => ({
         id: String(item.id),
         name: String(item.name),
@@ -114,7 +114,7 @@ const OrderForm = () => {
         image: String(item.image || '')
       }));
 
-      // Prepare order data - pass objects directly, NOT stringified
+      // Prepare order data
       const orderData = {
         customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
         customer_email: formData.email,
@@ -135,19 +135,30 @@ const OrderForm = () => {
 
       console.log('Submitting order:', orderData);
 
-      // Insert order using Supabase SDK - it handles JSONB serialization internally
-      const { data, error } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single();
+      // Use fetch with explicit Content-Type to bypass SDK serialization issues
+      const supabaseUrl = 'https://ajtdmenflndkxhvvuwak.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdGRtZW5mbG5ka3hodnZ1d2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1NDU4NDksImV4cCI6MjA3MzEyMTg0OX0.yzsAPbd3XRA5V_DOQ8_Lo0uoVk9_3PCap-bZr1XDlqc';
+      
+      const response = await fetch(`${supabaseUrl}/rest/v1/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(orderData)
+      });
 
-      if (error) {
-        console.error('Error creating order:', error);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error creating order:', errorData);
         alert('There was an error processing your order. Please try again.');
         return;
       }
 
+      const responseData = await response.json();
+      const data = Array.isArray(responseData) ? responseData[0] : responseData;
       console.log('Order created successfully:', data);
 
       // Send confirmation email (non-blocking)

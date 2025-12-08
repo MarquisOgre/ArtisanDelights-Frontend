@@ -6,10 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ShoppingCart, Star, Check } from 'lucide-react';
 import { useState } from 'react';
 import Footer from '@/components/Footer';
+import { useToast } from '@/hooks/use-toast';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const product = getProductBySlug(slug || '');
   const [selectedVariant, setSelectedVariant] = useState(product?.variants[0]);
 
@@ -25,6 +27,15 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  const handleAddToCart = () => {
+    if (!selectedVariant) return;
+    
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} (${selectedVariant.size}) has been added to your cart.`,
+    });
+  };
 
   const handleOrderNow = () => {
     if (!selectedVariant) return;
@@ -207,7 +218,7 @@ const ProductDetail = () => {
                       variant="outline"
                       size="lg"
                       disabled={!product.inStock}
-                      onClick={handleOrderNow}
+                      onClick={handleAddToCart}
                       className="flex items-center gap-2 border-terracotta text-terracotta hover:bg-terracotta/10"
                     >
                       <ShoppingCart className="h-5 w-5" />
