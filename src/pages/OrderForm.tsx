@@ -95,26 +95,32 @@ const OrderForm = () => {
     e.preventDefault();
     
     try {
-      // Prepare order data - using simple string conversion for JSON fields
+      // Prepare shipping address as plain object (Supabase SDK handles JSONB automatically)
+      const shippingAddress = {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        country: formData.country || 'India'
+      };
+
+      // Prepare order items as plain array (Supabase SDK handles JSONB automatically)
+      const orderItems = cartItems.map(item => ({
+        id: String(item.id),
+        name: String(item.name),
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        size: String(item.size),
+        image: String(item.image || '')
+      }));
+
+      // Prepare order data - pass objects directly, NOT stringified
       const orderData = {
         customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
         customer_email: formData.email,
         customer_phone: formData.phone || null,
-        shipping_address: JSON.stringify({
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country || 'India'
-        }),
-        order_items: JSON.stringify(cartItems.map(item => ({
-          id: String(item.id),
-          name: String(item.name),
-          price: Number(item.price),
-          quantity: Number(item.quantity),
-          size: String(item.size),
-          image: String(item.image || '')
-        }))),
+        shipping_address: shippingAddress,
+        order_items: orderItems,
         subtotal: Number(subtotal.toFixed(2)),
         shipping_cost: Number(shipping.toFixed(2)),
         tax_amount: Number(tax.toFixed(2)),
@@ -129,7 +135,7 @@ const OrderForm = () => {
 
       console.log('Submitting order:', orderData);
 
-      // Insert order using Supabase SDK
+      // Insert order using Supabase SDK - it handles JSONB serialization internally
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
