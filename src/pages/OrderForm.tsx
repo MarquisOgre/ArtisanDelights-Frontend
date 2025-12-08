@@ -95,32 +95,26 @@ const OrderForm = () => {
     e.preventDefault();
     
     try {
-      // Prepare clean order items (remove undefined/null values)
-      const cleanOrderItems = cartItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        size: item.size,
-        image: item.image || ''
-      }));
-
-      // Prepare clean shipping address
-      const cleanShippingAddress = {
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode,
-        country: formData.country || 'India'
-      };
-
-      // Prepare order data
+      // Prepare order data - using simple string conversion for JSON fields
       const orderData = {
         customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
         customer_email: formData.email,
         customer_phone: formData.phone || null,
-        shipping_address: cleanShippingAddress,
-        order_items: cleanOrderItems,
+        shipping_address: JSON.stringify({
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country || 'India'
+        }),
+        order_items: JSON.stringify(cartItems.map(item => ({
+          id: String(item.id),
+          name: String(item.name),
+          price: Number(item.price),
+          quantity: Number(item.quantity),
+          size: String(item.size),
+          image: String(item.image || '')
+        }))),
         subtotal: Number(subtotal.toFixed(2)),
         shipping_cost: Number(shipping.toFixed(2)),
         tax_amount: Number(tax.toFixed(2)),
@@ -133,30 +127,21 @@ const OrderForm = () => {
         order_notes: formData.notes || null
       };
 
-      console.log('Submitting order:', JSON.stringify(orderData, null, 2));
+      console.log('Submitting order:', orderData);
 
-      // Use fetch directly to avoid potential SDK serialization issues
-      const response = await fetch('https://ajtdmenflndkxhvvuwak.supabase.co/rest/v1/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdGRtZW5mbG5ka3hodnZ1d2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1NDU4NDksImV4cCI6MjA3MzEyMTg0OX0.yzsAPbd3XRA5V_DOQ8_Lo0uoVk9_3PCap-bZr1XDlqc',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdGRtZW5mbG5ka3hodnZ1d2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1NDU4NDksImV4cCI6MjA3MzEyMTg0OX0.yzsAPbd3XRA5V_DOQ8_Lo0uoVk9_3PCap-bZr1XDlqc',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(orderData)
-      });
+      // Insert order using Supabase SDK
+      const { data, error } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error creating order:', errorData);
+      if (error) {
+        console.error('Error creating order:', error);
         alert('There was an error processing your order. Please try again.');
         return;
       }
 
-      const responseData = await response.json();
-      // API returns array, get first item
-      const data = Array.isArray(responseData) ? responseData[0] : responseData;
       console.log('Order created successfully:', data);
 
       // Send confirmation email (non-blocking)

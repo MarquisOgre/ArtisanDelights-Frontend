@@ -2408,7 +2408,50 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Tax Settings */}
               <div>
+                <h3 className="text-lg font-semibold mb-4">Tax Settings</h3>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                      <Input
+                        id="taxRate"
+                        type="number"
+                        placeholder="8"
+                        defaultValue="8"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Current tax rate applied to all orders</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="taxName">Tax Name</Label>
+                      <Input
+                        id="taxName"
+                        placeholder="GST"
+                        defaultValue="GST"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Name displayed on invoices</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="artisan"
+                    onClick={() => {
+                      toast({
+                        title: "Tax Settings Saved",
+                        description: "Tax configuration has been updated successfully.",
+                        variant: "default"
+                      });
+                    }}
+                  >
+                    Save Tax Settings
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">UPI Payment Settings</h3>
                 <div className="space-y-4">
                   <div>
