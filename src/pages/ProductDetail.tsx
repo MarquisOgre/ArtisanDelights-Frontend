@@ -47,6 +47,31 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     if (!selectedVariant) return;
     
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: selectedVariant.price,
+      size: selectedVariant.size,
+      image: product.image,
+      quantity: 1,
+    };
+    
+    // Get existing cart from localStorage
+    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    
+    // Check if item already exists (same product and size)
+    const existingIndex = existingCart.findIndex(
+      (item: any) => item.id === product.id && item.size === selectedVariant.size
+    );
+    
+    if (existingIndex >= 0) {
+      existingCart[existingIndex].quantity += 1;
+    } else {
+      existingCart.push(cartItem);
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(existingCart));
+    
     toast({
       title: "Added to Cart",
       description: `${product.name} (${selectedVariant.size}) has been added to your cart.`,

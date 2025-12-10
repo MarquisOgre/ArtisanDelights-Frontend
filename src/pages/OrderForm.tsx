@@ -25,6 +25,7 @@ const OrderForm = () => {
   const selectedProduct = location.state?.selectedProduct;
   
   const [cartItems, setCartItems] = useState(() => {
+    // If coming from "Order Now", use that product
     if (selectedProduct) {
       return [{
         id: selectedProduct.id || '1',
@@ -34,6 +35,15 @@ const OrderForm = () => {
         size: selectedProduct.size,
         image: selectedProduct.image || '',
       }];
+    }
+    // Otherwise, load from localStorage cart
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        return JSON.parse(savedCart);
+      } catch {
+        return [];
+      }
     }
     return [];
   });
