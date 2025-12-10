@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +25,16 @@ interface OrderShippedRequest {
   expected_delivery?: string;
 }
 
+interface EmailSettings {
+  smtp_host: string;
+  smtp_port: number;
+  smtp_username: string;
+  smtp_password: string;
+  smtp_secure: boolean;
+  from_email: string;
+  from_name: string;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -34,6 +43,29 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { order, tracking_info = "Track via our website", expected_delivery = "3-5 business days" }: OrderShippedRequest = await req.json();
+
+    // Get SMTP settings from database
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data: settings, error: settingsError } = await supabase
+      .from('email_settings')
+      .select('*')
+      .single();
+
+    if (settingsError || !settings) {
+      console.error("Error fetching email settings:", settingsError);
+      throw new Error("Email settings not configured");
+    }
+
+    const emailSettings: EmailSettings = settings;
+    console.log("Using SMTP settings:", {
+      host: emailSettings.smtp_host,
+      port: emailSettings.smtp_port,
+      username: emailSettings.smtp_username,
+      from: emailSettings.from_email
+    });
 
     // Generate order items HTML
     const orderItemsHtml = order.order_items.map(item => 
@@ -44,68 +76,86 @@ const handler = async (req: Request): Promise<Response> => {
       </tr>`
     ).join('');
 
-    const emailResponse = await resend.emails.send({
-      from: "Artisan Delights <orders@resend.dev>",
-      to: [order.customer_email],
-      subject: `Your Order Has Been Shipped - ${order.order_number}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Order Shipped</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #4CAF50, #45a049); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">🚚 Your Order is on its Way!</h1>
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Order Shipped</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #4CAF50, #45a049); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">🚚 Your Order is on its Way!</h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <p style="font-size: 18px; margin-bottom: 20px;">Dear ${order.customer_name},</p>
+          
+          <p>Great news! Your order <strong>${order.order_number}</strong> has been shipped and is on its way to you.</p>
+          
+          <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4CAF50;">
+            <h3 style="color: #2e7d32; margin-top: 0;">📦 Shipping Information</h3>
+            <p style="margin: 5px 0;"><strong>Tracking:</strong> ${tracking_info}</p>
+            <p style="margin: 5px 0;"><strong>Expected Delivery:</strong> ${expected_delivery}</p>
           </div>
           
-          <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <p style="font-size: 18px; margin-bottom: 20px;">Dear ${order.customer_name},</p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="color: #8B4513; margin-top: 0;">Order Summary</h2>
             
-            <p>Great news! Your order <strong>${order.order_number}</strong> has been shipped and is on its way to you.</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+              <thead>
+                <tr style="background: #e9ecef;">
+                  <th style="padding: 10px; text-align: left; border-bottom: 2px solid #8B4513;">Product</th>
+                  <th style="padding: 10px; text-align: center; border-bottom: 2px solid #8B4513;">Qty</th>
+                  <th style="padding: 10px; text-align: right; border-bottom: 2px solid #8B4513;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${orderItemsHtml}
+              </tbody>
+            </table>
             
-            <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4CAF50;">
-              <h3 style="color: #2e7d32; margin-top: 0;">📦 Shipping Information</h3>
-              <p style="margin: 5px 0;"><strong>Tracking:</strong> ${tracking_info}</p>
-              <p style="margin: 5px 0;"><strong>Expected Delivery:</strong> ${expected_delivery}</p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="color: #8B4513; margin-top: 0;">Order Summary</h2>
-              
-              <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
-                <thead>
-                  <tr style="background: #e9ecef;">
-                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #8B4513;">Product</th>
-                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #8B4513;">Qty</th>
-                    <th style="padding: 10px; text-align: right; border-bottom: 2px solid #8B4513;">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${orderItemsHtml}
-                </tbody>
-              </table>
-              
-              <div style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 2px solid #8B4513;">
-                <strong style="font-size: 18px; color: #8B4513;">Total: ₹${order.total_amount.toFixed(2)}</strong>
-              </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-              <p style="color: #666; margin: 0;">Thank you for choosing Artisan Delights!</p>
-              <p style="color: #8B4513; font-weight: bold; margin: 5px 0 0 0;">Bringing authentic flavors to your kitchen</p>
+            <div style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 2px solid #8B4513;">
+              <strong style="font-size: 18px; color: #8B4513;">Total: ₹${order.total_amount.toFixed(2)}</strong>
             </div>
           </div>
-        </body>
-        </html>
-      `,
+          
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; margin: 0;">Thank you for choosing Artisan Delights!</p>
+            <p style="color: #8B4513; font-weight: bold; margin: 5px 0 0 0;">Bringing authentic flavors to your kitchen</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Send email using SMTP from database settings
+    const client = new SMTPClient({
+      connection: {
+        hostname: emailSettings.smtp_host,
+        port: emailSettings.smtp_port,
+        tls: emailSettings.smtp_secure,
+        auth: {
+          username: emailSettings.smtp_username,
+          password: emailSettings.smtp_password,
+        },
+      },
     });
 
-    console.log("Order shipped email sent successfully:", emailResponse);
+    await client.send({
+      from: `${emailSettings.from_name} <${emailSettings.from_email}>`,
+      to: order.customer_email,
+      subject: `Your Order Has Been Shipped - ${order.order_number}`,
+      content: "Please view this email in an HTML-capable email client.",
+      html: html,
+    });
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    await client.close();
+
+    console.log("Order shipped email sent successfully via SMTP");
+
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

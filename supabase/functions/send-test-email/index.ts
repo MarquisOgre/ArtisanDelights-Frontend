@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +13,16 @@ interface TestEmailRequest {
   template_type: 'confirmation' | 'shipped' | 'delivered';
 }
 
+interface EmailSettings {
+  smtp_host: string;
+  smtp_port: number;
+  smtp_username: string;
+  smtp_password: string;
+  smtp_secure: boolean;
+  from_email: string;
+  from_name: string;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -22,6 +31,29 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { email, template_type }: TestEmailRequest = await req.json();
+
+    // Get SMTP settings from database
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data: settings, error: settingsError } = await supabase
+      .from('email_settings')
+      .select('*')
+      .single();
+
+    if (settingsError || !settings) {
+      console.error("Error fetching email settings:", settingsError);
+      throw new Error("Email settings not configured");
+    }
+
+    const emailSettings: EmailSettings = settings;
+    console.log("Using SMTP settings:", {
+      host: emailSettings.smtp_host,
+      port: emailSettings.smtp_port,
+      username: emailSettings.smtp_username,
+      from: emailSettings.from_email
+    });
 
     // Sample order data for testing
     const sampleOrder = {
@@ -44,7 +76,6 @@ const handler = async (req: Request): Promise<Response> => {
     ).join('');
 
     let subject = "";
-    let html = "";
     let bgGradient = "";
     let headerText = "";
     let bodyContent = "";
@@ -103,7 +134,7 @@ const handler = async (req: Request): Promise<Response> => {
         break;
     }
 
-    html = `
+    const html = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -156,16 +187,32 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    const emailResponse = await resend.emails.send({
-      from: "Artisan Delights <orders@resend.dev>",
-      to: [email],
+    // Send email using SMTP from database settings
+    const client = new SMTPClient({
+      connection: {
+        hostname: emailSettings.smtp_host,
+        port: emailSettings.smtp_port,
+        tls: emailSettings.smtp_secure,
+        auth: {
+          username: emailSettings.smtp_username,
+          password: emailSettings.smtp_password,
+        },
+      },
+    });
+
+    await client.send({
+      from: `${emailSettings.from_name} <${emailSettings.from_email}>`,
+      to: email,
       subject: subject,
+      content: "Please view this email in an HTML-capable email client.",
       html: html,
     });
 
-    console.log("Test email sent successfully:", emailResponse);
+    await client.close();
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    console.log("Test email sent successfully via SMTP");
+
+    return new Response(JSON.stringify({ success: true, message: "Email sent via SMTP" }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
