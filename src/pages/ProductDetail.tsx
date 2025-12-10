@@ -1,10 +1,10 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getProductBySlug } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/enhanced-button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingCart, Star, Check } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, ShoppingCart, Star, Check, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,8 +12,24 @@ const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getProductBySlug, loading } = useProducts();
   const product = getProductBySlug(slug || '');
-  const [selectedVariant, setSelectedVariant] = useState(product?.variants[0]);
+  const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0]);
+
+  // Update selected variant when product loads
+  useEffect(() => {
+    if (product?.variants?.[0] && !selectedVariant) {
+      setSelectedVariant(product.variants[0]);
+    }
+  }, [product, selectedVariant]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-terracotta" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
