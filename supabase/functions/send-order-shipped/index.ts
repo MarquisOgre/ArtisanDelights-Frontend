@@ -133,12 +133,17 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Attempting to send shipped email via Brevo API to:", order.customer_email);
 
-    // Use Brevo HTTP API instead of SMTP for better compatibility
+    // Use Brevo HTTP API with dedicated API key
+    const brevoApiKey = Deno.env.get("BREVO_API_KEY");
+    if (!brevoApiKey) {
+      throw new Error("BREVO_API_KEY not configured");
+    }
+
     const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "accept": "application/json",
-        "api-key": emailSettings.smtp_password,
+        "api-key": brevoApiKey,
         "content-type": "application/json",
       },
       body: JSON.stringify({
