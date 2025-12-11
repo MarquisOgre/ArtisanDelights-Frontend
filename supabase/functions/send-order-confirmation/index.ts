@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailSettings: EmailSettings = settings;
-    console.log("Using SMTP settings:", {
+    console.log("Using email settings:", {
       host: emailSettings.smtp_host,
       port: emailSettings.smtp_port,
       username: emailSettings.smtp_username,
@@ -145,30 +144,35 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Send email using SMTP from database settings
-    const client = new SMTPClient({
-      connection: {
-        hostname: emailSettings.smtp_host,
-        port: emailSettings.smtp_port,
-        tls: emailSettings.smtp_secure,
-        auth: {
-          username: emailSettings.smtp_username,
-          password: emailSettings.smtp_password,
-        },
+    console.log("Attempting to send confirmation email via Brevo API to:", order.customer_email);
+
+    // Use Brevo HTTP API instead of SMTP for better compatibility
+    const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": emailSettings.smtp_password,
+        "content-type": "application/json",
       },
+      body: JSON.stringify({
+        sender: {
+          name: emailSettings.from_name,
+          email: emailSettings.from_email,
+        },
+        to: [{ email: order.customer_email }],
+        subject: `Order Confirmation - ${order.order_number}`,
+        htmlContent: html,
+      }),
     });
 
-    await client.send({
-      from: `${emailSettings.from_name} <${emailSettings.from_email}>`,
-      to: order.customer_email,
-      subject: `Order Confirmation - ${order.order_number}`,
-      content: "Please view this email in an HTML-capable email client.",
-      html: html,
-    });
+    if (!brevoResponse.ok) {
+      const errorData = await brevoResponse.text();
+      console.error("Brevo API error:", errorData);
+      throw new Error(`Brevo API error: ${errorData}`);
+    }
 
-    await client.close();
-
-    console.log("Order confirmation email sent successfully via SMTP");
+    const responseData = await brevoResponse.json();
+    console.log("Order confirmation email sent successfully via Brevo API:", responseData);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
