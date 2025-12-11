@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailSettings: EmailSettings = settings;
-    console.log("Using SMTP settings:", {
+    console.log("Using email settings:", {
       host: emailSettings.smtp_host,
       port: emailSettings.smtp_port,
       username: emailSettings.smtp_username,
@@ -98,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="color: #8B4513; margin-top: 0;">What You Received</h2>
+            <h2 style="color: #8B4513; margin-top: 0;">Order Details</h2>
             
             <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
               <thead>
@@ -123,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #2e7d32; margin: 0;">We'd love to hear about your experience! Please consider leaving a review or sharing your favorite recipes using our products.</p>
           </div>
           
-          <p>If you have any questions or need assistance, please don't hesitate to contact us. We're here to help!</p>
+          <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
           
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
             <p style="color: #666; margin: 0;">Thank you for choosing Artisan Delights!</p>
@@ -134,30 +133,35 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Send email using SMTP from database settings
-    const client = new SMTPClient({
-      connection: {
-        hostname: emailSettings.smtp_host,
-        port: emailSettings.smtp_port,
-        tls: emailSettings.smtp_secure,
-        auth: {
-          username: emailSettings.smtp_username,
-          password: emailSettings.smtp_password,
-        },
+    console.log("Attempting to send delivered email via Brevo API to:", order.customer_email);
+
+    // Use Brevo HTTP API instead of SMTP for better compatibility
+    const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": emailSettings.smtp_password,
+        "content-type": "application/json",
       },
+      body: JSON.stringify({
+        sender: {
+          name: emailSettings.from_name,
+          email: emailSettings.from_email,
+        },
+        to: [{ email: order.customer_email }],
+        subject: `Your Order Has Been Delivered - ${order.order_number}`,
+        htmlContent: html,
+      }),
     });
 
-    await client.send({
-      from: `${emailSettings.from_name} <${emailSettings.from_email}>`,
-      to: order.customer_email,
-      subject: `Your Order Has Been Delivered - ${order.order_number}`,
-      content: "Please view this email in an HTML-capable email client.",
-      html: html,
-    });
+    if (!brevoResponse.ok) {
+      const errorData = await brevoResponse.text();
+      console.error("Brevo API error:", errorData);
+      throw new Error(`Brevo API error: ${errorData}`);
+    }
 
-    await client.close();
-
-    console.log("Order delivered email sent successfully via SMTP");
+    const responseData = await brevoResponse.json();
+    console.log("Order delivered email sent successfully via Brevo API:", responseData);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
