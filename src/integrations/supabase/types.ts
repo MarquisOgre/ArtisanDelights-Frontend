@@ -21,6 +21,7 @@ export type Database = {
           from_name: string
           id: string
           is_active: boolean
+          resend_api_key: string | null
           smtp_host: string
           smtp_password: string
           smtp_port: number
@@ -34,6 +35,7 @@ export type Database = {
           from_name?: string
           id?: string
           is_active?: boolean
+          resend_api_key?: string | null
           smtp_host: string
           smtp_password: string
           smtp_port?: number
@@ -47,6 +49,7 @@ export type Database = {
           from_name?: string
           id?: string
           is_active?: boolean
+          resend_api_key?: string | null
           smtp_host?: string
           smtp_password?: string
           smtp_port?: number

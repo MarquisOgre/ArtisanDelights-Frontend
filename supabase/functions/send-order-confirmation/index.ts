@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,13 +26,9 @@ interface OrderConfirmationRequest {
 }
 
 interface EmailSettings {
-  smtp_host: string;
-  smtp_port: number;
-  smtp_username: string;
-  smtp_password: string;
-  smtp_secure: boolean;
   from_email: string;
   from_name: string;
+  resend_api_key: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -45,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log("Received order data:", JSON.stringify(order, null, 2));
 
-    // Get SMTP settings from database
+    // Get email settings from database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -61,12 +58,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailSettings: EmailSettings = settings;
-    console.log("Using email settings:", {
-      host: emailSettings.smtp_host,
-      port: emailSettings.smtp_port,
-      username: emailSettings.smtp_username,
-      from: emailSettings.from_email
-    });
+    
+    if (!emailSettings.resend_api_key) {
+      throw new Error("Resend API key not configured. Please add it in Admin Dashboard > Email Settings");
+    }
+
+    console.log("Using Resend with from:", emailSettings.from_email);
+
+    // Initialize Resend
+    const resend = new Resend(emailSettings.resend_api_key);
 
     // Parse order_items if it's a string (from database JSON)
     let orderItems: OrderItem[] = [];
@@ -144,40 +144,16 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    console.log("Attempting to send confirmation email via Brevo API to:", order.customer_email);
+    console.log("Attempting to send confirmation email via Resend to:", order.customer_email);
 
-    // Use Brevo HTTP API with dedicated API key
-    const brevoApiKey = Deno.env.get("BREVO_API_KEY");
-    if (!brevoApiKey) {
-      throw new Error("BREVO_API_KEY not configured");
-    }
-
-    const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "accept": "application/json",
-        "api-key": brevoApiKey,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        sender: {
-          name: emailSettings.from_name,
-          email: emailSettings.from_email,
-        },
-        to: [{ email: order.customer_email }],
-        subject: `Order Confirmation - ${order.order_number}`,
-        htmlContent: html,
-      }),
+    const emailResponse = await resend.emails.send({
+      from: `${emailSettings.from_name} <${emailSettings.from_email}>`,
+      to: [order.customer_email],
+      subject: `Order Confirmation - ${order.order_number}`,
+      html: html,
     });
 
-    if (!brevoResponse.ok) {
-      const errorData = await brevoResponse.text();
-      console.error("Brevo API error:", errorData);
-      throw new Error(`Brevo API error: ${errorData}`);
-    }
-
-    const responseData = await brevoResponse.json();
-    console.log("Order confirmation email sent successfully via Brevo API:", responseData);
+    console.log("Order confirmation email sent successfully via Resend:", emailResponse);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

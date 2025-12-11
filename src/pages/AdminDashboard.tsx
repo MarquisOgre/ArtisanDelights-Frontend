@@ -42,7 +42,8 @@ const AdminDashboard = () => {
     smtp_username: '',
     smtp_password: '',
     from_email: '',
-    from_name: 'Artisan Delights'
+    from_name: 'Artisan Delights',
+    resend_api_key: ''
   });
   const [emailTemplates, setEmailTemplates] = useState([]);
   const [testEmail, setTestEmail] = useState('');
@@ -2237,67 +2238,51 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="smtpHost">SMTP Host</Label>
-                  <Input
-                    id="smtpHost"
-                    placeholder="smtp.gmail.com"
-                    value={emailSettings.smtp_host}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_host: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="smtpPort">SMTP Port</Label>
-                  <Input
-                    id="smtpPort"
-                    type="number"
-                    placeholder="587"
-                    value={emailSettings.smtp_port}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_port: parseInt(e.target.value) || 587 }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="smtpUsername">SMTP Username</Label>
-                  <Input
-                    id="smtpUsername"
-                    placeholder="your-email@gmail.com"
-                    value={emailSettings.smtp_username}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_username: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="smtpPassword">SMTP Password</Label>
-                  <Input
-                    id="smtpPassword"
-                    type="password"
-                    placeholder="Your app password"
-                    value={emailSettings.smtp_password}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, smtp_password: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="fromEmail">From Email</Label>
-                  <Input
-                    id="fromEmail"
-                    placeholder="orders@artisandelights.com"
-                    value={emailSettings.from_email}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, from_email: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="fromName">From Name</Label>
-                  <Input
-                    id="fromName"
-                    placeholder="Artisan Delights"
-                    value={emailSettings.from_name}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, from_name: e.target.value }))}
-                  />
+              {/* Resend API Key - Primary Email Provider */}
+              <div className="bg-sage/10 border border-sage/20 rounded-lg p-4 mb-6">
+                <h4 className="text-lg font-semibold mb-2 text-sage">Resend Email Service</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Using Resend for sending emails. Free tier: 100 emails/day. Get your API key from{' '}
+                  <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-sage underline">
+                    resend.com/api-keys
+                  </a>
+                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="resendApiKey">Resend API Key *</Label>
+                    <Input
+                      id="resendApiKey"
+                      type="password"
+                      placeholder="re_xxxxxxxxxxxx"
+                      value={emailSettings.resend_api_key || ''}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, resend_api_key: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromEmail">From Email *</Label>
+                    <Input
+                      id="fromEmail"
+                      placeholder="onboarding@resend.dev"
+                      value={emailSettings.from_email}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, from_email: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Use onboarding@resend.dev for testing or verify your domain</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="fromName">From Name</Label>
+                    <Input
+                      id="fromName"
+                      placeholder="Artisan Delights"
+                      value={emailSettings.from_name}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, from_name: e.target.value }))}
+                    />
+                  </div>
                 </div>
               </div>
+              
               <div className="flex gap-2">
                 <Button onClick={saveEmailSettings} variant="artisan">
-                  Save SMTP Settings
+                  Save Email Settings
                 </Button>
               </div>
               
